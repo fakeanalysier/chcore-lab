@@ -68,6 +68,7 @@ void kernel_space_check()
 	for(unsigned long  i = 64; i < 128; i++)
 	{
 		kernel_val = *(unsigned long *)(KBASE + (i << 21));
+		kinfo("kernel_val: %lx\n", kernel_val);
 	}
 	kinfo("kernel space check pass\n");
 }
