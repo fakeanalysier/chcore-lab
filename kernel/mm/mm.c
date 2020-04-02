@@ -128,5 +128,5 @@ void mm_init(void *info)
 
 	map_kernel_space(KBASE + (64UL<< 21), 64UL<< 21, 64UL<<21);
 	//check whether kernel space [KABSE + 128 : KBASE + 256] is mapped 
-	kernel_space_check();
+	// kernel_space_check();
 }
