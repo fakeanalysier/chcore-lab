@@ -115,8 +115,8 @@
  * Lab3: Your code here
  * Use exception_entry to fill the exception vector table to redirect
  * every entry to cooresponeding entry.
- * NOTE: el1t means SP_EL1 is used as stack before exception and el1h
- * means SP_EL0 is used
+ * NOTE: el1t means SP_EL0 is used as stack before exception and el1h
+ * means SP_EL1 is used
  */
 .align	11
 EXPORT(el1_vector)
