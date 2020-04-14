@@ -22,7 +22,7 @@ echo "building ramdisk ..."
 
 mkdir -p ramdisk
 echo "copy user/*.bin to ramdisk."
-cp lab3/*.bin ramdisk/
+# cp lab3/*.bin ramdisk/
 cp lab4/*.bin ramdisk/
 
 cd ramdisk
