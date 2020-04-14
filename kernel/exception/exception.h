@@ -33,7 +33,7 @@
 #define ERROR_EL0_32            15
 
 #ifndef __ASM__
-#include <lib/types.h>
+#include <common/types.h>
 
 /* assembly helper functions */
 void set_exception_vector(void);

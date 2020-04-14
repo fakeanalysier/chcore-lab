@@ -37,7 +37,6 @@ static void printk_write_num(int base, unsigned long long n, int neg)
 {
   static const char hex[] = "0123456789abcdef";
   char buff[MAX_INT_BUFF_SIZE];
-  // TODO: fill this function.
   (void) buff;  // delete it
   (void) hex;   // delete it
 
