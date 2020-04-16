@@ -38,8 +38,8 @@ void handle_irq(int type)
 	/**
 	 * Lab 4
 	 * Acquire the big kernel lock, if :
-	 *	The irq is from the kernel
-	 * 	The thread being interrupted is an idle thread.
+	 *	The irq is not from the kernel
+	 * 	Or the thread being interrupted is an idle thread in the kernel.
 	 */
 
 	plat_handle_irq();

@@ -51,7 +51,7 @@ void handle_entry_c(int type, u64 esr, u64 address)
 {
 	/** 
 	 * Lab 4
-	 * Acquire the big kernel lock, if the exception is from kernel
+	 * Acquire the big kernel lock, if the exception is not from kernel
 	 */ 
 
 	/* ec: exception class */
