@@ -215,8 +215,6 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 	/* for mapping pmos */
 	struct pmo_map_request pmo_map_requests[1];
 	int transfer_caps[MAX_NR_CAPS];
-	// Lab4 useless code, help avoid compile warning, you can delete it as you wish
-	transfer_caps[0] = 0; 
 
 	{
 		/**
@@ -368,11 +366,6 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		main_thread_cap = usys_create_thread(
 		    new_process_cap, stack_va, pc,
 		    (u64)NULL, MAIN_THREAD_PRIO, aff);
-		if (main_thread_cap < 0) {
-			printf("%s: fail to create thread (ret: %d)\n", __func__,
-			       ret);
-			goto fail;
-		}
 	}
 
 	{

@@ -6,6 +6,7 @@
 #include <lib/bug.h>
 #include <lib/print.h>
 #include <lib/string.h>
+#include <lib/fs_defs.h>
 
 #define VMR_READ  (1 << 0)
 #define VMR_WRITE (1 << 1)
@@ -109,3 +110,18 @@ int readelf_from_kernel_cpio(const char *filename, struct user_elf *user_elf)
 
 	return ret;
 }
+
+ipc_struct_t *tmpfs_ipc_struct;
+
+// read binary file according to pathname stored in `pathbuf` from FS server
+// parse elf from this binary and store it in `user_elf`
+int readelf_from_fs(const char *pathbuf, struct user_elf *user_elf)
+{
+	int ret;
+	int tmpfs_read_pmo_cap;
+
+  // TODO(Lab5): your code here
+
+	return ret;
+}
+
