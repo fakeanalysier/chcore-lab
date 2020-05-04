@@ -88,15 +88,14 @@ def test_cat():
 
 @test(5, parent=test_shell_run)
 def test_auto_complement():
-    r.match("> yie.*ld_spin.bin> sp.*awn_basic.bin")
+    r.match("> yie.*ld_spin.bin")
+    r.match("> sp.*awn_basic.bin")
 
 @test(10, parent=test_shell_run)
 def test_run_executable():
     r.match("\[Parent\] create the server process.")
 
 TOP_RE = r" *Thread *ffffff00[0-9a-z]{8}[\t ]*Type:[\t ]*[A-Z]{4}[\t ]*State:[\t ]*TS_[A-Z]+[\t ]*CPU[\t ]*[0-3]{1}[\t ]*AFF[\t ]*[0-3]{1}[\t ]*Budget[\t ]*[0-9]{1}"
-#BACKTRACE_RE = r" *LR *ffffff00000[0-9a-z]{5} *FP *ffffff00000d[0-9a-z]{4} *Args *([0-9a-z]+)"
-#BACKTRACE_LR = r" *LR *(ffffff00000[0-9a-z]{5}) *FP *ffffff00000d[0-9a-z]{4} *Args *[0-9a-z]+"
 @test(10, parent=test_shell_run)
 def test_top():
     matches = re.findall(TOP_RE, r.qemu.output, re.MULTILINE)

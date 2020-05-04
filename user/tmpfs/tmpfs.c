@@ -374,7 +374,7 @@ static int dirent_filler(void **dirpp, void *end, char *name, off_t off,
 	dirp->d_off = off;
 	dirp->d_reclen = len;
 	dirp->d_type = type;
-	memcpy(dirp->d_name, name, strlen(name));
+	strcpy(dirp->d_name, name);
 	*dirpp = p;
 	return len;
 }
