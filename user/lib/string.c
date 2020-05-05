@@ -31,7 +31,8 @@ int memcmp(const void *s1, const void *s2, size_t n)
 		q += 1;
     i += 1;
 	}
-	return (*p - *q);
+
+	return (i == n)? 0 : (*p - *q);
 }
 
 void strcpy(char *dst, const char *src)
