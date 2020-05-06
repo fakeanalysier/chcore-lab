@@ -35,7 +35,7 @@ void sys_putc(char ch)
 
 u32 sys_getc(void)
 {
-	return nb_uart_recv();
+	return uart_recv();
 }
 
 /* 
