@@ -284,32 +284,9 @@ ssize_t tfs_file_write(struct inode *inode, off_t offset, const char *data,
 	size_t to_write;
 	void *page;
 
-	while (size > 0) {
-		page_no = cur_off / PAGE_SIZE;
-		page_off = cur_off % PAGE_SIZE;
-
-		page = radix_get(&inode->data, page_no);
-		if (cur_off >= inode->size && !page) {
-			/* TODO: use real malloc */
-			page = malloc(PAGE_SIZE);
-			if (!page)
-				return cur_off - offset;
-			radix_add(&inode->data, page_no, page);
-		}
-
-		BUG_ON(page == NULL);
-
-		to_write = MIN(size, PAGE_SIZE - page_off);
-		memcpy(page + page_off, data, to_write);
-		cur_off += to_write;
-		data += to_write;
-		size -= to_write;
-	}
-
-	if (cur_off > inode->size) {
-		inode->size = cur_off;
-	}
-	return cur_off - offset;
+  // TODO(Lab5): write your code here
+	
+  return cur_off - offset;
 }
 
 // read memory from `inode` at `offset` in to `buf` for length is `size`, do not
