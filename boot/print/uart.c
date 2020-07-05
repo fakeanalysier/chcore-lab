@@ -13,10 +13,10 @@ void early_uart_init(void)
 	early_put32(AUX_MU_IIR_REG, 0xC6);
 	early_put32(AUX_MU_BAUD_REG, 270);
 	ra = early_get32(GPFSEL1);
-	ra &= ~(7 << 12);	//gpio14
-	ra |= 2 << 12;		//alt5
-	ra &= ~(7 << 15);	//gpio15
-	ra |= 2 << 15;		//alt5
+	ra &= ~(7 << 12); //gpio14
+	ra |= 2 << 12; //alt5
+	ra &= ~(7 << 15); //gpio15
+	ra |= 2 << 15; //alt5
 	early_put32(GPFSEL1, ra);
 	early_put32(GPPUD, 0);
 	delay(150);

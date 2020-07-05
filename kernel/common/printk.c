@@ -13,13 +13,13 @@
 #include <common/uart.h>
 #include <common/types.h>
 
-#define MAX_INT_BUFF_SIZE  64
+#define MAX_INT_BUFF_SIZE 64
 
 typedef __builtin_va_list va_list;
-#define va_start(v,l)   __builtin_va_start(v,l)
-#define va_end(v)       __builtin_va_end(v)
-#define va_arg(v,l)     __builtin_va_arg(v,l)
-#define va_copy(d,s)    __builtin_va_copy(d,s)
+#define va_start(v, l) __builtin_va_start(v, l)
+#define va_end(v)      __builtin_va_end(v)
+#define va_arg(v, l)   __builtin_va_arg(v, l)
+#define va_copy(d, s)  __builtin_va_copy(d, s)
 
 static void printk_write_string(const char *str)
 {
@@ -35,12 +35,11 @@ static void printk_write_string(const char *str)
 // Remember the most significant digit is printed first.
 static void printk_write_num(int base, unsigned long long n, int neg)
 {
-  static const char hex[] = "0123456789abcdef";
-  char buff[MAX_INT_BUFF_SIZE];
-  // TODO: fill this function.
-  (void) buff;  // delete it
-  (void) hex;   // delete it
-
+	static const char hex[] = "0123456789abcdef";
+	char buff[MAX_INT_BUFF_SIZE];
+	// TODO: fill this function.
+	(void)buff; // delete it
+	(void)hex; // delete it
 }
 
 void printk_format(char *format, va_list args)
@@ -55,7 +54,7 @@ void printk_format(char *format, va_list args)
 	for (i = 0; format[i] != 0; i++) {
 		/* Handle simple characters. */
 		if (!escape_mode && format[i] != '%') {
-			if ( format[i] == '\n' ){
+			if (format[i] == '\n') {
 				uart_send('\n');
 				uart_send('\r');
 			} else {

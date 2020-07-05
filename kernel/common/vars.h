@@ -13,11 +13,11 @@
 #pragma once
 
 /* Leave 8K space to kernel stack */
-#define KERNEL_STACK_SIZE       (8192)
-#define IDLE_STACK_SIZE         (8192)
-#define STACK_ALIGNMENT         16
+#define KERNEL_STACK_SIZE (8192)
+#define IDLE_STACK_SIZE   (8192)
+#define STACK_ALIGNMENT   16
 
 /* can be different in different architectures */
 #ifndef KBASE
-#define KBASE                0xffffff0000000000
+#define KBASE 0xffffff0000000000
 #endif
