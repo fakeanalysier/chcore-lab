@@ -55,6 +55,9 @@ ifeq ($(LAB), 2)
 endif
 	./scripts/grade-lab$(LAB)
 
+format:
+	$(V)find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i -style=file
+
 .PHONY: clean
 clean:
 	@rm -rf build
