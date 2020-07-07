@@ -3,8 +3,8 @@
 #include "boot.h"
 #include "image.h"
 
-ALIGN(16)
-VISIBLE char boot_cpu_stack[CONFIG_MAX_NUM_CPUS][BIT(PAGE_BITS)] = { 0 };
+ALIGN(16) // 栈必须 16 字节对齐
+VISIBLE char boot_cpu_stack[CONFIG_MAX_NUM_CPUS][BIT(PAGE_BITS)] = { 0 }; // 每个 CPU 一页
 long secondary_boot_flag[CONFIG_MAX_NUM_CPUS + 1] = { 0 };
 
 void init_c(void)

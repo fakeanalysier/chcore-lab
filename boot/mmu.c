@@ -31,6 +31,7 @@ typedef unsigned long vaddr_t;
 typedef unsigned long uint64_t;
 typedef unsigned long uintptr_t;
 
+// 类似 Linux 的四级页表
 /* Paging structures for kernel mapping */
 uint64_t _boot_pgd_up[BIT(PGD_BITS)] ALIGN(BIT(PGD_SIZE_BITS));
 uint64_t _boot_pud_up[BIT(PUD_BITS)] ALIGN(BIT(PUD_SIZE_BITS));
@@ -79,6 +80,7 @@ void init_boot_pt(void)
 			| BIT(0); /* 1G block */
 	}
 
+	// 映射内核虚拟地址 KERNEL_VADDR 到物理地址 0
 	_boot_pgd_up[GET_PGD_INDEX(first_vaddr)] = ((uintptr_t)_boot_pud_up) |
 						   BIT(1) | BIT(0);
 
