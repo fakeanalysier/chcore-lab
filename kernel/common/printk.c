@@ -38,8 +38,23 @@ static void printk_write_num(int base, unsigned long long n, int neg)
 	static const char hex[] = "0123456789abcdef";
 	char buff[MAX_INT_BUFF_SIZE];
 	// TODO: fill this function.
-	(void)buff; // delete it
-	(void)hex; // delete it
+	if (base > sizeof(hex) || base < 2)
+		return;
+	int i = MAX_INT_BUFF_SIZE - 1;
+	buff[i--] = '\0';
+	if (n == 0) {
+		buff[i--] = '0';
+	} else {
+		while (n > 0) {
+			buff[i--] = hex[n % base];
+			n /= base;
+			if (i < 0 || (i == 0 && neg))
+				break;
+		}
+	}
+	if (neg)
+		buff[i--] = '-';
+	printk_write_string(buff + (i + 1));
 }
 
 void printk_format(char *format, va_list args)
