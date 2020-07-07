@@ -14,6 +14,9 @@ all: build
 gdb:
 	gdb-multiarch -n -x .gdbinit
 
+gdb-tui:
+	gdb-multiarch -n -x .gdbinit -tui
+
 build: FORCE
 	./scripts/docker_build.sh
 
