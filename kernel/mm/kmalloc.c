@@ -81,7 +81,7 @@ void kfree(void *ptr)
 	struct page *p_page;
 
 	p_page = virt_to_page(&global_mem, ptr);
-	if(p_page && p_page->slab)
+	if (p_page && p_page->slab)
 		free_in_slab(ptr);
 	else
 		buddy_free_pages(&global_mem, p_page);
