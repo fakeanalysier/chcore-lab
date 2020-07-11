@@ -37,6 +37,7 @@ void set_page_table(paddr_t pgtbl)
 
 #define USER_PTE   0
 #define KERNEL_PTE 1
+
 /*
  * the 3rd arg means the kind of PTE.
  */
@@ -164,6 +165,28 @@ static int get_next_ptp(ptp_t *cur_ptp, u32 level, vaddr_t va, ptp_t **next_ptp,
 int query_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
 {
 	//lab2
+	pte_t *pte;
+	ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
+	for (u32 level = 0; level < 4; level++) {
+		int res = get_next_ptp(cur_ptp, level, va, &next_ptp, &pte,
+				       false);
+		if (IS_ERR(res))
+			return res;
+		if (res == BLOCK_PTP) {
+			*entry = pte;
+			if (level == 1)
+				*pa = GET_PADDR_IN_PTE(pte) &
+				      ~ARM64_MMU_L1_BLOCK_MASK;
+			else // level == 2
+				*pa = GET_PADDR_IN_PTE(pte) &
+				      ~ARM64_MMU_L2_BLOCK_MASK;
+			return 0;
+		}
+		// res == NORMAL_PTP, keep quering
+		cur_ptp = next_ptp;
+	}
+	*pa = GET_PADDR_IN_PTE(pte) & ~PAGE_MASK;
+	*entry = pte;
 	return 0;
 }
 
@@ -186,7 +209,28 @@ int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 		       vmr_prop_t flags)
 {
 	//lab2:
-
+	u64 npages = ROUND_UP(len, PAGE_SIZE) / PAGE_SIZE;
+	while (npages > 0) {
+		pte_t *pte;
+		ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
+		for (u32 level = 0; level < 4; level++) {
+			int res = get_next_ptp(cur_ptp, level, va, &next_ptp,
+					       &pte, true);
+			if (IS_ERR(res))
+				return res;
+			// assert: res == NORMAL_PTP, is table
+			cur_ptp = next_ptp;
+		}
+		pte->pte = 0;
+		pte->l3_page.is_valid = 1;
+		pte->l3_page.is_page = 1;
+		pte->l3_page.pfn = pa >> PAGE_SHIFT;
+		set_pte_flags(pte, flags, 0);
+		va += PAGE_SIZE;
+		pa += PAGE_SIZE;
+		npages--;
+	}
+	flush_tlb();
 	return 0;
 }
 
@@ -205,6 +249,22 @@ int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 int unmap_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, size_t len)
 {
 	//lab2
-
+	u64 npages = ROUND_UP(len, PAGE_SIZE) / PAGE_SIZE;
+	while (npages > 0) {
+		pte_t *pte;
+		ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
+		for (u32 level = 0; level < 4; level++) {
+			int res = get_next_ptp(cur_ptp, level, va, &next_ptp,
+					       &pte, false);
+			if (IS_ERR(res))
+				return res;
+			// assert: res == NORMAL_PTP, is table
+			cur_ptp = next_ptp;
+		}
+		pte->pte = 0; // clear pte == unmap the page
+		va += PAGE_SIZE;
+		npages--;
+	}
+	flush_tlb();
 	return 0;
 }
