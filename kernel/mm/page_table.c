@@ -215,41 +215,117 @@ int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 	//lab2:
 	if (va % PAGE_SIZE != 0 || pa % PAGE_SIZE != 0 || len % PAGE_SIZE != 0)
 		return -EINVAL;
-	u64 npages = ROUND_UP(len, PAGE_SIZE) / PAGE_SIZE;
-	while (npages > 0) {
+
+	// // create mapping for each page
+	// u64 npages = ROUND_UP(len, PAGE_SIZE) / PAGE_SIZE;
+	// while (npages > 0) {
+	// 	pte_t *pte;
+	// 	ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
+	// 	for (u32 level = 0; level < 3; level++) {
+	// 		int res = get_next_ptp(cur_ptp, level, va, &next_ptp,
+	// 				       &pte, true);
+	// 		if (IS_ERR(res))
+	// 			return res;
+	// 		if (res != NORMAL_PTP)
+	// 			// there is already a block mapping
+	// 			return -EEXIST;
+	// 		// assert: res == NORMAL_PTP, is table
+	// 		cur_ptp = next_ptp;
+	// 	}
+	// 	// now cur_ptp is a L3 page table page
+	// 	pte = &cur_ptp->ent[GET_L3_INDEX(va)];
+	// 	if (!IS_PTE_INVALID(pte->pte))
+	// 		// there is already a page mapping
+	// 		return -EEXIST;
+	// 	pte->pte = 0;
+	// 	pte->l3_page.is_valid = 1;
+	// 	pte->l3_page.is_page = 1;
+	// 	pte->l3_page.pfn = pa >> PAGE_SHIFT;
+	// 	set_pte_flags(pte, flags, 0);
+	// 	va += PAGE_SIZE;
+	// 	pa += PAGE_SIZE;
+	// 	npages--;
+	// }
+
+	// create mapping with least querying level
+	// TODO: reduce duplicated code
+	size_t len_step;
+	while (len > 0) {
 		pte_t *pte;
-		ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
-		for (u32 level = 0; level < 3; level++) {
-			int res = get_next_ptp(cur_ptp, level, va, &next_ptp,
+		if (len >= ARM64_MMU_L1_BLOCK_SIZE &&
+		    va % ARM64_MMU_L1_BLOCK_SIZE == 0) {
+			// map 1G block
+			ptp_t *pud; // L1 page table
+			int res = get_next_ptp((ptp_t *)pgtbl, 0, va, &pud,
 					       &pte, true);
 			if (IS_ERR(res))
 				return res;
-			if (res != NORMAL_PTP)
-				// there is already a block mapping
+			pte = &pud->ent[GET_L1_INDEX(va)];
+			if (!IS_PTE_INVALID(pte->pte))
+				// there is already a page mapping
 				return -EEXIST;
-			// assert: res == NORMAL_PTP, is table
-			cur_ptp = next_ptp;
+			pte->pte = 0;
+			pte->l1_block.is_valid = 1;
+			pte->l1_block.is_table = 0;
+			pte->l1_block.pfn = pa >> ARM64_MMU_L1_BLOCK_SHIFT;
+			len_step = ARM64_MMU_L1_BLOCK_SIZE;
+		} else if (len >= ARM64_MMU_L2_BLOCK_SIZE &&
+			   va % ARM64_MMU_L2_BLOCK_SIZE == 0) {
+			// map 2M block
+			ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
+			for (u32 level = 0; level < 2; level++) {
+				int res = get_next_ptp(cur_ptp, level, va,
+						       &next_ptp, &pte, true);
+				if (IS_ERR(res))
+					return res;
+				if (res != NORMAL_PTP)
+					// there is already a block mapping
+					return -EEXIST;
+				// assert: res == NORMAL_PTP, is table
+				cur_ptp = next_ptp;
+			}
+			ptp_t *pmd = cur_ptp;
+			pte = &pmd->ent[GET_L2_INDEX(va)];
+			if (!IS_PTE_INVALID(pte->pte))
+				// there is already a page mapping
+				return -EEXIST;
+			pte->pte = 0;
+			pte->l2_block.is_valid = 1;
+			pte->l2_block.is_table = 0;
+			pte->l2_block.pfn = pa >> ARM64_MMU_L2_BLOCK_SHIFT;
+			len_step = ARM64_MMU_L2_BLOCK_SIZE;
+		} else {
+			// map 4K page
+			ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
+			for (u32 level = 0; level < 3; level++) {
+				int res = get_next_ptp(cur_ptp, level, va,
+						       &next_ptp, &pte, true);
+				if (IS_ERR(res))
+					return res;
+				if (res != NORMAL_PTP)
+					// there is already a block mapping
+					return -EEXIST;
+				// assert: res == NORMAL_PTP, is table
+				cur_ptp = next_ptp;
+			}
+			// now cur_ptp is a L3 page table page
+			pte = &cur_ptp->ent[GET_L3_INDEX(va)];
+			if (!IS_PTE_INVALID(pte->pte))
+				// there is already a page mapping
+				return -EEXIST;
+			pte->pte = 0;
+			pte->l3_page.is_valid = 1;
+			pte->l3_page.is_page = 1;
+			pte->l3_page.pfn = pa >> ARM64_MMU_L3_PAGE_SHIFT;
+			len_step = ARM64_MMU_L3_PAGE_SIZE;
 		}
-		// now cur_ptp is a L3 page table page
-		pte = &cur_ptp->ent[GET_L3_INDEX(va)];
-		if (!IS_PTE_INVALID(pte->pte))
-			// there is already a page mapping
-			return -EEXIST;
-		pte->pte = 0;
-		pte->l3_page.is_valid = 1;
-		pte->l3_page.is_page = 1;
-		pte->l3_page.pfn = pa >> PAGE_SHIFT;
 		set_pte_flags(pte, flags, 0);
-		va += PAGE_SIZE;
-		pa += PAGE_SIZE;
-		npages--;
+		len_step = MIN(len_step, len);
+		va += len_step;
+		pa += len_step;
+		len -= len_step;
 	}
-	// while (len > 0) {
-	// 	if (len >= ARM64_MMU_L1_BLOCK_SIZE &&
-	// 	    va % ARM64_MMU_L1_BLOCK_SIZE == 0) {
-	// 		// map 1G block
-	// 	}
-	// }
+
 	flush_tlb();
 	return 0;
 }
