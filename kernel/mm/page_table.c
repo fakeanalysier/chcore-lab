@@ -167,7 +167,7 @@ int query_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
 	//lab2
 	pte_t *pte;
 	ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
-	for (u32 level = 0; level < 4; level++) {
+	for (u32 level = 0; level < 3; level++) {
 		int res = get_next_ptp(cur_ptp, level, va, &next_ptp, &pte,
 				       false);
 		if (IS_ERR(res))
@@ -175,17 +175,21 @@ int query_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
 		if (res == BLOCK_PTP) {
 			*entry = pte;
 			if (level == 1)
-				*pa = GET_PADDR_IN_PTE(pte) &
-				      ~ARM64_MMU_L1_BLOCK_MASK;
+				*pa = pte->l1_block.pfn
+				      << ARM64_MMU_L1_BLOCK_SHIFT;
 			else // level == 2
-				*pa = GET_PADDR_IN_PTE(pte) &
-				      ~ARM64_MMU_L2_BLOCK_MASK;
+				*pa = pte->l2_block.pfn
+				      << ARM64_MMU_L2_BLOCK_SHIFT;
 			return 0;
 		}
 		// res == NORMAL_PTP, keep quering
 		cur_ptp = next_ptp;
 	}
-	*pa = GET_PADDR_IN_PTE(pte) & ~PAGE_MASK;
+	// now cur_ptp is a L3 page table page
+	pte = &cur_ptp->ent[GET_L3_INDEX(va)];
+	if (IS_PTE_INVALID(pte->pte))
+		return -ENOMAPPING;
+	*pa = pte->l3_page.pfn << ARM64_MMU_L3_PAGE_SHIFT;
 	*entry = pte;
 	return 0;
 }
@@ -209,18 +213,28 @@ int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 		       vmr_prop_t flags)
 {
 	//lab2:
+	if (va % PAGE_SIZE != 0 || pa % PAGE_SIZE != 0 || len % PAGE_SIZE != 0)
+		return -EINVAL;
 	u64 npages = ROUND_UP(len, PAGE_SIZE) / PAGE_SIZE;
 	while (npages > 0) {
 		pte_t *pte;
 		ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
-		for (u32 level = 0; level < 4; level++) {
+		for (u32 level = 0; level < 3; level++) {
 			int res = get_next_ptp(cur_ptp, level, va, &next_ptp,
 					       &pte, true);
 			if (IS_ERR(res))
 				return res;
+			if (res != NORMAL_PTP)
+				// there is already a block mapping
+				return -EEXIST;
 			// assert: res == NORMAL_PTP, is table
 			cur_ptp = next_ptp;
 		}
+		// now cur_ptp is a L3 page table page
+		pte = &cur_ptp->ent[GET_L3_INDEX(va)];
+		if (!IS_PTE_INVALID(pte->pte))
+			// there is already a page mapping
+			return -EEXIST;
 		pte->pte = 0;
 		pte->l3_page.is_valid = 1;
 		pte->l3_page.is_page = 1;
@@ -230,6 +244,12 @@ int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 		pa += PAGE_SIZE;
 		npages--;
 	}
+	// while (len > 0) {
+	// 	if (len >= ARM64_MMU_L1_BLOCK_SIZE &&
+	// 	    va % ARM64_MMU_L1_BLOCK_SIZE == 0) {
+	// 		// map 1G block
+	// 	}
+	// }
 	flush_tlb();
 	return 0;
 }
@@ -249,21 +269,39 @@ int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 int unmap_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, size_t len)
 {
 	//lab2
-	u64 npages = ROUND_UP(len, PAGE_SIZE) / PAGE_SIZE;
-	while (npages > 0) {
+	if (va % PAGE_SIZE != 0 || len % PAGE_SIZE != 0)
+		return -EINVAL;
+	while (len > 0) {
+		size_t len_step = ARM64_MMU_L3_PAGE_SIZE;
 		pte_t *pte;
 		ptp_t *cur_ptp = (ptp_t *)pgtbl, *next_ptp;
-		for (u32 level = 0; level < 4; level++) {
+		bool is_block = false;
+		for (u32 level = 0; level < 3; level++) {
 			int res = get_next_ptp(cur_ptp, level, va, &next_ptp,
 					       &pte, false);
-			if (IS_ERR(res))
+			if (IS_ERR(res)) // no mapping exists for the current va
 				return res;
-			// assert: res == NORMAL_PTP, is table
+			if (res == BLOCK_PTP) {
+				is_block = true;
+				if (level == 1)
+					len_step = ARM64_MMU_L1_BLOCK_SIZE;
+				else // level == 2
+					len_step = ARM64_MMU_L2_BLOCK_SIZE;
+				break;
+			}
+			// res == NORMAL_PTP, keep quering
 			cur_ptp = next_ptp;
 		}
-		pte->pte = 0; // clear pte == unmap the page
-		va += PAGE_SIZE;
-		npages--;
+		if (!is_block) {
+			// now cur_ptp is a L3 page table page
+			pte = &cur_ptp->ent[GET_L3_INDEX(va)];
+			if (IS_PTE_INVALID(pte->pte))
+				return -ENOMAPPING;
+		}
+		pte->pte = 0; // clear pte == unmap the page or block
+		len_step = MIN(len_step, len); // avoid infinite loop
+		va += len_step;
+		len -= len_step;
 	}
 	flush_tlb();
 	return 0;
