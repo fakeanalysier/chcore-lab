@@ -27,12 +27,11 @@ char kernel_stack[PLAT_CPU_NUM][KERNEL_STACK_SIZE];
 int mon_backtrace();
 
 // Test the stack backtrace function (lab 1 only)
-void
-test_backtrace(long x)
+void test_backtrace(long x)
 {
 	kinfo("entering test_backtrace %d\n", x);
 	if (x > 0)
-		test_backtrace(x-1);
+		test_backtrace(x - 1);
 	else
 		mon_backtrace(0, 0, 0);
 	kinfo("leaving test_backtrace %d\n", x);
@@ -44,17 +43,16 @@ void main(void *addr)
 	uart_init();
 	kinfo("[ChCore] uart init finished\n");
 
-  	kinfo("6828 decimal is %x hex!\n", 6828);
+	kinfo("6828 decimal is %x hex!\n", 6828);
 
-  	test_backtrace(5);
+	test_backtrace(5);
 
 	mm_init(NULL);
 	kinfo("mm init finished\n");
-	
+
 	/* Init exception vector */
 	exception_init();
 	kinfo("[ChCore] interrupt init finished\n");
-
 
 #ifdef TEST
 	/* Create initial thread here*/
@@ -64,11 +62,10 @@ void main(void *addr)
 	/* We will run the kernel test if you do not type make bin=xxx */
 	break_point();
 	BUG("No given TEST!");
-#endif 
+#endif
 
 	eret_to_thread(switch_context());
 
 	/* Should provide panic and use here */
 	BUG("[FATAL] Should never be here!\n");
 }
-

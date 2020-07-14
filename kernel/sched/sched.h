@@ -23,20 +23,20 @@
 struct thread;
 
 /* BUDGET represents the number of TICKs */
-#define DEFAULT_BUDGET	2
-#define TICK_MS		1500
+#define DEFAULT_BUDGET 2
+#define TICK_MS        1500
 
-#define MAX_PRIO	255
-#define MIN_PRIO	0
-#define PRIO_NUM	(MAX_PRIO + 1)
+#define MAX_PRIO 255
+#define MIN_PRIO 0
+#define PRIO_NUM (MAX_PRIO + 1)
 
-#define NO_AFF		-1
+#define NO_AFF -1
 
 /* Data structures */
 
-#define	STATE_STR_LEN	20
+#define STATE_STR_LEN 20
 enum thread_state {
-	TS_INIT	= 0,
+	TS_INIT = 0,
 	TS_READY,
 	/* intermediate stat used by sched */
 	TS_INTER,
@@ -48,7 +48,7 @@ enum thread_state {
 	TS_EXITING,
 };
 
-#define TYPE_STR_LEN	20
+#define TYPE_STR_LEN 20
 enum thread_type {
 	TYPE_IDLE = 0,
 	/* ROOT thread has all cap, it is also a user thread */
@@ -66,7 +66,7 @@ typedef struct sched_cont {
 
 /* size in registers.h (to be used in asm) */
 typedef struct arch_exec_cont {
-    u64 reg[REG_NUM];
+	u64 reg[REG_NUM];
 } arch_exec_cont_t;
 
 struct thread_ctx {
@@ -81,4 +81,3 @@ extern char thread_type[][TYPE_STR_LEN];
 extern char thread_state[][STATE_STR_LEN];
 
 u64 switch_context(void);
-

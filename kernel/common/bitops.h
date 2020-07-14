@@ -13,10 +13,9 @@
 #pragma once
 #include <common/macro.h>
 
-#define BITS_PER_BYTE		8
-#define BITS_PER_LONG		(sizeof(unsigned long) * BITS_PER_BYTE)
-#define BITS_TO_LONGS(nr)	DIV_ROUND_UP(nr, BITS_PER_LONG)
-
+#define BITS_PER_BYTE     8
+#define BITS_PER_LONG     (sizeof(unsigned long) * BITS_PER_BYTE)
+#define BITS_TO_LONGS(nr) DIV_ROUND_UP(nr, BITS_PER_LONG)
 
 static inline void set_bit(unsigned int nr, volatile unsigned long *p)
 {
@@ -78,7 +77,6 @@ static inline int find_next_bit(unsigned long *p, unsigned long size,
 	return __find_next_bit(p, size, start, 0);
 }
 
-#define for_each_set_bit(pos, addr, size)		\
-	for ((pos) = find_next_bit((addr), (size), 0);	\
-	     (pos) < (size);				\
-             (pos) = find_next_bit((addr), (size), (pos) + 1))
+#define for_each_set_bit(pos, addr, size)                              \
+	for ((pos) = find_next_bit((addr), (size), 0); (pos) < (size); \
+	     (pos) = find_next_bit((addr), (size), (pos) + 1))

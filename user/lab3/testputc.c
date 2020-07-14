@@ -6,4 +6,3 @@ int main(int argc, char *argv[], char *envp[])
 	usys_putc('\n');
 	return 0;
 }
-

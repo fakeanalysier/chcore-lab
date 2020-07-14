@@ -20,13 +20,12 @@
 extern unsigned long *img_end;
 struct global_mem global_mem;
 
-
-#define PHYSICAL_MEM_START (24*1024*1024) //24M
+#define PHYSICAL_MEM_START (24 * 1024 * 1024) //24M
 
 #define START_VADDR phys_to_virt(PHYSICAL_MEM_START) //24M
-#define NPAGES (128*1000)
+#define NPAGES      (128 * 1000)
 
-#define PHYSICAL_MEM_END (PHYSICAL_MEM_START+NPAGES*BUDDY_PAGE_SIZE)
+#define PHYSICAL_MEM_END (PHYSICAL_MEM_START + NPAGES * BUDDY_PAGE_SIZE)
 
 extern void parse_mem_map(void *);
 extern void arch_mm_init(void);
@@ -44,7 +43,7 @@ u64 physmem_map[8][2];
 unsigned long get_ttbr1()
 {
 	unsigned long pgd;
-	__asm__ ("mrs %0,ttbr1_el1" : "=r"(pgd));
+	__asm__("mrs %0,ttbr1_el1" : "=r"(pgd));
 	return pgd;
 }
 /*
@@ -57,16 +56,12 @@ unsigned long get_ttbr1()
 void map_kernel_space(vaddr_t va, paddr_t pa, size_t len)
 {
 	//lab2
-
-
 }
-
 
 void kernel_space_check()
 {
 	unsigned long kernel_val;
-	for(unsigned long  i = 64; i < 128; i++)
-	{
+	for (unsigned long i = 64; i < 128; i++) {
 		kernel_val = *(unsigned long *)(KBASE + (i << 21));
 		kinfo("kernel_val: %lx\n", kernel_val);
 	}
@@ -89,7 +84,7 @@ void mm_init(void *info)
 
 	if (physmem_map_num == 1) {
 		free_mem_start = phys_to_virt(physmem_map[0][0]);
-		free_mem_end   = phys_to_virt(physmem_map[0][1]);
+		free_mem_end = phys_to_virt(physmem_map[0][1]);
 
 		npages = (free_mem_end - free_mem_start) /
 			 (PAGE_SIZE + sizeof(struct page));
@@ -98,12 +93,13 @@ void mm_init(void *info)
 		kdebug("[CHCORE] mm: free_mem_start is 0x%lx, free_mem_end is 0x%lx\n",
 		       free_mem_start, free_mem_end);
 	} else if (physmem_map_num == 0) {
-		free_mem_start = phys_to_virt(ROUND_UP((vaddr_t)(&img_end), PAGE_SIZE));
+		free_mem_start =
+			phys_to_virt(ROUND_UP((vaddr_t)(&img_end), PAGE_SIZE));
 		// free_mem_end = phys_to_virt(PHYSICAL_MEM_END);
 		npages = NPAGES;
 		start_vaddr = START_VADDR;
 		kdebug("[CHCORE] mm: free_mem_start is 0x%lx, free_mem_end is 0x%lx\n",
-			free_mem_start, phys_to_virt(PHYSICAL_MEM_END));
+		       free_mem_start, phys_to_virt(PHYSICAL_MEM_END));
 	} else {
 		BUG("Unsupport physmem_map_num\n");
 	}
@@ -126,7 +122,7 @@ void mm_init(void *info)
 	/* init PCID */
 	arch_mm_init();
 
-	map_kernel_space(KBASE + (64UL<< 21), 64UL<< 21, 64UL<<21);
-	//check whether kernel space [KABSE + 128 : KBASE + 256] is mapped 
+	map_kernel_space(KBASE + (64UL << 21), 64UL << 21, 64UL << 21);
+	//check whether kernel space [KABSE + 128 : KBASE + 256] is mapped
 	// kernel_space_check();
 }

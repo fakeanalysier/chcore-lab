@@ -72,7 +72,6 @@ typedef s64 off_t;
 /* Used for process IDs and process group IDs. */
 typedef s64 pid_t;
 
-
 /* Used to identify a thread attribute object. */
 typedef u64 pthread_attr_t;
 
@@ -153,7 +152,7 @@ typedef u64 vaddr_t;
 typedef u64 atomic_cnt;
 
 /* Different platform may have different cacheline size and may have some features like prefetch */
-#define CACHELINE_SZ 64
-#define r_align(n, r)        (((n) + (r) - 1) & -(r))
-#define cache_align(n)       r_align(n , CACHELINE_SZ)
+#define CACHELINE_SZ         64
+#define r_align(n, r)        (((n) + (r)-1) & -(r))
+#define cache_align(n)       r_align(n, CACHELINE_SZ)
 #define pad_to_cache_line(n) (cache_align(n) - (n))

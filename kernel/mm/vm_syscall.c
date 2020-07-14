@@ -120,10 +120,10 @@ int sys_create_pmos(u64 user_buf, u64 cnt)
 	return 0;
 }
 
-#define WRITE_PMO	0
-#define READ_PMO	1
-static int read_write_pmo(u64 pmo_cap, u64 offset, u64 user_buf,
-			  u64 size, u64 type)
+#define WRITE_PMO 0
+#define READ_PMO  1
+static int read_write_pmo(u64 pmo_cap, u64 offset, u64 user_buf, u64 size,
+			  u64 type)
 {
 	struct pmobject *pmo;
 	int r = 0;
@@ -177,7 +177,6 @@ int sys_read_pmo(u64 pmo_cap, u64 offset, u64 user_ptr, u64 len)
 	return read_write_pmo(pmo_cap, offset, user_ptr, len, READ_PMO);
 }
 
-
 /* TODO: hide this interface later */
 /*
  * A process can not only map a PMO into its private address space,
@@ -198,8 +197,8 @@ int sys_map_pmo(u64 target_process_cap, u64 pmo_cap, u64 addr, u64 perm)
 	}
 
 	/* map the pmo to the target process */
-	target_process = obj_get(current_process, target_process_cap,
-				 TYPE_PROCESS);
+	target_process =
+		obj_get(current_process, target_process_cap, TYPE_PROCESS);
 	if (!target_process) {
 		r = -ECAPBILITY;
 		goto out_obj_put_pmo;
@@ -222,8 +221,7 @@ int sys_map_pmo(u64 target_process_cap, u64 pmo_cap, u64 addr, u64 perm)
 	 */
 	if (target_process != current_process)
 		/* if using cap_move, we need to consider remove the mappings */
-		r = cap_copy(current_process, target_process,
-			       pmo_cap, 0, 0);
+		r = cap_copy(current_process, target_process, pmo_cap, 0, 0);
 	else
 		r = 0;
 
@@ -273,10 +271,8 @@ int sys_map_pmos(u64 target_process_cap, u64 user_buf, u64 cnt)
 		 * if target_process is not current_process,
 		 * ret is cap on success.
 		 */
-		ret = sys_map_pmo(target_process_cap,
-				  requests[i].pmo_cap,
-				  requests[i].addr,
-				  requests[i].perm);
+		ret = sys_map_pmo(target_process_cap, requests[i].pmo_cap,
+				  requests[i].addr, requests[i].perm);
 		/*
 		 * TODO: what if some errors occur (i.e., create part of pmos).
 		 * levave it to user space for now.
@@ -303,8 +299,8 @@ int sys_unmap_pmo(u64 target_process_cap, u64 pmo_cap, u64 addr)
 		return -EPERM;
 
 	/* map the pmo to the target process */
-	target_process = obj_get(current_process, target_process_cap,
-				 TYPE_PROCESS);
+	target_process =
+		obj_get(current_process, target_process_cap, TYPE_PROCESS);
 	if (!target_process) {
 		ret = -EPERM;
 		goto fail1;
@@ -330,14 +326,14 @@ fail1:
 	return ret;
 }
 
-
 /*
  * User process heap start: 0x600000000000
  *
  * defined in mm/vmregion.c
  */
 
-u64 sys_handle_brk(u64 addr) {
+u64 sys_handle_brk(u64 addr)
+{
 	struct vmspace *vmspace;
 	struct pmobject *pmo;
 	struct vmregion *vmr;

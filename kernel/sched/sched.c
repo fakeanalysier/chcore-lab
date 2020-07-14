@@ -26,25 +26,13 @@
 
 struct thread *current_threads[PLAT_CPU_NUM];
 
-char thread_type[][TYPE_STR_LEN] = {
-	"IDLE  ",
-	"ROOT  ",
-	"USER  ",
-	"SHADOW",
-	"KERNEL",
-	"TESTS "
-};
+char thread_type[][TYPE_STR_LEN] = { "IDLE  ", "ROOT  ", "USER  ",
+				     "SHADOW", "KERNEL", "TESTS " };
 
-char thread_state[][STATE_STR_LEN] = {
-	"TS_INIT      ",
-	"TS_READY     ",
-	"TS_INTER     ",
-	"TS_RUNNING   ",
-	"TS_EXIT      ",
-	"TS_WAITING   ",
-	"TS_EXITING   "
-};
-
+char thread_state[][STATE_STR_LEN] = { "TS_INIT      ", "TS_READY     ",
+				       "TS_INTER     ", "TS_RUNNING   ",
+				       "TS_EXIT      ", "TS_WAITING   ",
+				       "TS_EXITING   " };
 
 /*
  * Switch vmspace and arch-related stuff
@@ -63,12 +51,10 @@ u64 switch_context(void)
 	BUG_ON(!target_thread);
 	BUG_ON(!target_thread->thread_ctx);
 
-
 	/* These 3 types of thread do not have vmspace */
 	if (target_thread->thread_ctx->type != TYPE_IDLE &&
-		target_thread->thread_ctx->type != TYPE_KERNEL &&
-		target_thread->thread_ctx->type != TYPE_TESTS) {
-
+	    target_thread->thread_ctx->type != TYPE_KERNEL &&
+	    target_thread->thread_ctx->type != TYPE_TESTS) {
 		BUG_ON(!target_thread->vmspace);
 		/*
 		* Recording the CPU the thread runs on: for TLB maintainence.

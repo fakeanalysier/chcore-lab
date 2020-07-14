@@ -16,9 +16,9 @@
 #include <process/thread.h>
 
 /* TODO: Proper defination of MAX_IRQ_NUM. */
-#define MAX_IRQ_NUM	256
-#define HANDLE_KERNEL	0
-#define HANDLE_USER	1
+#define MAX_IRQ_NUM   256
+#define HANDLE_KERNEL 0
+#define HANDLE_USER   1
 
 void enable_irq(void);
 void disable_irq(void);

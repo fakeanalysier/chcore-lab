@@ -2,8 +2,8 @@
 #include <lib/types.h>
 #include <lib/syscall.h>
 
-#define PMO_SIZE        0x1000
-#define MAP_VA          0x1000000
+#define PMO_SIZE 0x1000
+#define MAP_VA   0x1000000
 
 /* virtual memory rights */
 #define VM_READ  (1 << 0)
@@ -15,14 +15,14 @@
 #define PMO_DATA   1
 
 /* a thread's own cap_group */
-#define SELF_CAP   0
+#define SELF_CAP 0
 
 int main(int argc, char *argv[], char *envp[])
 {
 	int pmo_cap, r;
 	unsigned long *ptr;
 
-	pmo_cap =  usys_create_pmo(0x1000, PMO_ANONYM);
+	pmo_cap = usys_create_pmo(0x1000, PMO_ANONYM);
 	if (pmo_cap < 0) {
 		printf("usys_create_pmo ret:%d\n", pmo_cap);
 		usys_exit(pmo_cap);

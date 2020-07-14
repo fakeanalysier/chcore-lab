@@ -31,7 +31,6 @@ void sys_putc(char ch)
 	 */
 }
 
-
 /*
  * Lab3: Your code here
  * Update the syscall table as you like to redirect syscalls

@@ -27,37 +27,37 @@
 static inline vaddr_t get_fault_addr()
 {
 	vaddr_t addr;
-	asm volatile ("mrs %0, far_el1\n\t" :"=r" (addr));
+	asm volatile("mrs %0, far_el1\n\t" : "=r"(addr));
 	return addr;
 }
 
-
 int handle_trans_fault(struct vmspace *vmspace, vaddr_t fault_addr);
 
-void do_page_fault(u64 esr, u64 fault_ins_addr) {
+void do_page_fault(u64 esr, u64 fault_ins_addr)
+{
 	vaddr_t fault_addr;
 	int fsc; // fault status code
 
 	fault_addr = get_fault_addr();
 	fsc = GET_ESR_EL1_FSC(esr);
 	switch (fsc) {
-		case DFSC_TRANS_FAULT_L0:
-		case DFSC_TRANS_FAULT_L1:
-		case DFSC_TRANS_FAULT_L2:
-		case DFSC_TRANS_FAULT_L3: {
-			int ret;
+	case DFSC_TRANS_FAULT_L0:
+	case DFSC_TRANS_FAULT_L1:
+	case DFSC_TRANS_FAULT_L2:
+	case DFSC_TRANS_FAULT_L3: {
+		int ret;
 
-			ret = handle_trans_fault(current_thread->vmspace, fault_addr);
-			if (ret != 0) {
-				kinfo("pgfault at 0x%p failed\n", fault_addr);
-				sys_exit(ret);
-			}
-			break;
+		ret = handle_trans_fault(current_thread->vmspace, fault_addr);
+		if (ret != 0) {
+			kinfo("pgfault at 0x%p failed\n", fault_addr);
+			sys_exit(ret);
 		}
-		default:
-			kinfo("do_page_fault: fsc is unsupported (0x%b) now\n", fsc);
-			BUG_ON(1);
-			break;
+		break;
+	}
+	default:
+		kinfo("do_page_fault: fsc is unsupported (0x%b) now\n", fsc);
+		BUG_ON(1);
+		break;
 	}
 }
 
@@ -82,4 +82,3 @@ int handle_trans_fault(struct vmspace *vmspace, vaddr_t fault_addr)
 
 	return 0;
 }
-

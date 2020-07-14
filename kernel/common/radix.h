@@ -17,7 +17,7 @@
 #define RADIX_NODE_BITS (9)
 #define RADIX_NODE_SIZE (1 << (RADIX_NODE_BITS))
 #define RADIX_NODE_MASK (RADIX_NODE_SIZE - 1)
-#define RADIX_MAX_BITS (64)
+#define RADIX_MAX_BITS  (64)
 
 struct radix_node {
 	union {

@@ -3,7 +3,7 @@
 #include <lib/types.h>
 
 #define ALLOCATE_SIZE 4096
-#define STRING_SIZE	  64
+#define STRING_SIZE   64
 
 int main(int argc, char *argv[], char *envp[])
 {
@@ -18,8 +18,8 @@ int main(int argc, char *argv[], char *envp[])
 		printf("sbrk not correctly implemented\n");
 	}
 
-	s = (char *) start;
-	for ( i = 0; i < STRING_SIZE; i++) {
+	s = (char *)start;
+	for (i = 0; i < STRING_SIZE; i++) {
 		printf("%d,", i);
 		s[i] = 'A' + (i % 26);
 	}

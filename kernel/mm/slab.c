@@ -14,7 +14,6 @@
 #include <common/types.h>
 #include <common/kprint.h>
 
-
 #include "slab.h"
 #include "buddy.h"
 
@@ -44,7 +43,7 @@ static inline u64 order_to_size(u64 order)
 	return 1UL << order;
 }
 
-static void* alloc_slab_memory(u64 size)
+static void *alloc_slab_memory(u64 size)
 {
 	struct page *p_page, *page;
 	void *addr;
@@ -52,7 +51,7 @@ static void* alloc_slab_memory(u64 size)
 	void *page_addr;
 	int i;
 
-	order = size_to_order(size/BUDDY_PAGE_SIZE);
+	order = size_to_order(size / BUDDY_PAGE_SIZE);
 	p_page = buddy_get_pages(&global_mem, order);
 	if (p_page == NULL) {
 		kwarn("failed to alloc_slab_memory: out of memory\n");
@@ -101,13 +100,14 @@ static slab_header_t *init_slab_cache(int order, int size)
 	return slab;
 }
 
-static void* _alloc_in_slab_nolock(slab_header_t *slab_header, int order) {
-	slab_slot_list_t* first_slot;
-	void* next_slot;
+static void *_alloc_in_slab_nolock(slab_header_t *slab_header, int order)
+{
+	slab_slot_list_t *first_slot;
+	void *next_slot;
 	slab_header_t *next_slab;
 	slab_header_t *new_slab;
 
-	first_slot = (slab_slot_list_t*)(slab_header->free_list_head);
+	first_slot = (slab_slot_list_t *)(slab_header->free_list_head);
 	if (likely(first_slot != NULL)) {
 		next_slot = first_slot->next_free;
 		slab_header->free_list_head = next_slot;
@@ -116,7 +116,7 @@ static void* _alloc_in_slab_nolock(slab_header_t *slab_header, int order) {
 
 	next_slab = slab_header->next_slab;
 	while (next_slab != NULL) {
-		first_slot = (slab_slot_list_t*)(next_slab->free_list_head);
+		first_slot = (slab_slot_list_t *)(next_slab->free_list_head);
 		if (likely(first_slot != NULL)) {
 			next_slot = first_slot->next_free;
 			next_slab->free_list_head = next_slot;
@@ -133,8 +133,9 @@ static void* _alloc_in_slab_nolock(slab_header_t *slab_header, int order) {
 	return _alloc_in_slab_nolock(new_slab, order);
 }
 
-static void* _alloc_in_slab(slab_header_t *slab_header, int order) {
-	void* free_slot;
+static void *_alloc_in_slab(slab_header_t *slab_header, int order)
+{
+	void *free_slot;
 
 	free_slot = _alloc_in_slab_nolock(slab_header, order);
 
@@ -169,7 +170,7 @@ void *alloc_in_slab(u64 size)
 	return _alloc_in_slab(slabs[order], order);
 }
 
-void free_in_slab(void* addr)
+void free_in_slab(void *addr)
 {
 	struct page *page;
 	slab_header_t *slab;

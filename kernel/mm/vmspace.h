@@ -65,7 +65,6 @@ int vmspace_map_range(struct vmspace *vmspace, vaddr_t va, size_t len,
 		      vmr_prop_t flags, struct pmobject *pmo);
 int vmspace_unmap_range(struct vmspace *vmspace, vaddr_t va, size_t len);
 
-
 struct vmregion *find_vmr_for_va(struct vmspace *vmspace, vaddr_t addr);
 
 void switch_vmspace_to(struct vmspace *);
@@ -75,4 +74,3 @@ paddr_t get_page_from_pmo(struct pmobject *pmo, u64 index);
 
 struct vmregion *init_heap_vmr(struct vmspace *vmspace, vaddr_t va,
 			       struct pmobject *pmo);
-
