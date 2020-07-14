@@ -30,6 +30,9 @@ struct page {
 	void *slab;
 };
 
+#define ln2page(node) \
+	((struct page *)((void *)node - (u64)(&((struct page *)0)->list_node)))
+
 struct free_list {
 	struct list_head list_head;
 	u64 nr_free;

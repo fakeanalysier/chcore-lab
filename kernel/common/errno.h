@@ -26,7 +26,7 @@
 #define ECAPBILITY  11 /* Invalid capability */
 #define ESUPPORT    12 /* Not supported */
 #define EBADSYSCALL 13 /* Bad syscall number */
-#define ENOMAPPING  14 /* Bad syscall number */
+#define ENOMAPPING  14 /* Mapping does not exist */
 #define ENOENT      15 /* Entry does not exist */
 #define EEXIST      16 /* Entry already exists */
 #define ENOTEMPTY   17 /* Dir is not empty */
