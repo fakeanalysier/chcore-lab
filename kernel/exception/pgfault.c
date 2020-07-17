@@ -65,7 +65,9 @@ int handle_trans_fault(struct vmspace *vmspace, vaddr_t fault_addr)
 {
 	struct vmregion *vmr;
 	struct pmobject *pmo;
+	void *page_va;
 	paddr_t pa;
+	int ret;
 	u64 offset;
 
 	/*
@@ -79,6 +81,21 @@ int handle_trans_fault(struct vmspace *vmspace, vaddr_t fault_addr)
 	 * NOTE: when any problem happened in this function, return
 	 * -ENOMAPPING
 	 */
+	vmr = find_vmr_for_va(vmspace, fault_addr);
+	if (!vmr)
+		return -ENOMAPPING;
+	pmo = vmr->pmo;
+	if (pmo->type != PMO_ANONYM)
+		return -ENOMAPPING;
+	page_va = get_pages(0); // memory leak
+	if (!page_va)
+		return -ENOMAPPING;
+	pa = virt_to_phys(page_va);
+	ret = map_range_in_pgtbl(vmspace->pgtbl,
+				 ROUND_DOWN(fault_addr, PAGE_SIZE), pa,
+				 PAGE_SIZE, vmr->perm);
+	if (IS_ERR(ret))
+		return -ENOMAPPING;
 
 	return 0;
 }
