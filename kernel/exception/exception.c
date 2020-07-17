@@ -52,6 +52,7 @@ void handle_entry_c(int type, u64 esr, u64 address)
 	case ESR_EL1_EC_UNKNOWN:
 		kinfo(UNKNOWN);
 		sys_exit(-ESUPPORT);
+		break;
 	default:
 		kdebug("Unsupported Exception ESR %lx\n", esr);
 		break;
