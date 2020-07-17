@@ -50,11 +50,11 @@ u64 switch_context(void)
 	target_thread = current_thread;
 	BUG_ON(!target_thread);
 	BUG_ON(!target_thread->thread_ctx);
+	target_ctx = target_thread->thread_ctx;
 
 	/* These 3 types of thread do not have vmspace */
-	if (target_thread->thread_ctx->type != TYPE_IDLE &&
-	    target_thread->thread_ctx->type != TYPE_KERNEL &&
-	    target_thread->thread_ctx->type != TYPE_TESTS) {
+	if (target_ctx->type != TYPE_IDLE && target_ctx->type != TYPE_KERNEL &&
+	    target_ctx->type != TYPE_TESTS) {
 		BUG_ON(!target_thread->vmspace);
 		/*
 		* Recording the CPU the thread runs on: for TLB maintainence.
@@ -69,5 +69,5 @@ u64 switch_context(void)
 	 * Return the correct value in order to make eret_to_thread work correctly
 	 * in main.c
 	 */
-	return (u64)target_thread->thread_ctx;
+	return (u64)target_ctx;
 }

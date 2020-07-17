@@ -68,7 +68,7 @@ int handle_trans_fault(struct vmspace *vmspace, vaddr_t fault_addr)
 	void *page_va;
 	paddr_t pa;
 	int ret;
-	u64 offset;
+	// u64 offset;
 
 	/*
 	 * Lab3: your code here
