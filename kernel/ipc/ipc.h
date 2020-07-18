@@ -16,7 +16,6 @@
 #include <common/list.h>
 #include <process/thread.h>
 
-
 /*
  * Used in both server and client register.
  * Stack setting is invalid in client register.

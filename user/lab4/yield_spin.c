@@ -14,7 +14,6 @@ void *thread_routine(void *arg)
 	printf("Hello, I am thread %u\n", thread_id);
 
 	while (running) {
-		
 	}
 	/* usys_exit: just de-schedule itself without reclaiming the resource */
 	usys_exit(0);

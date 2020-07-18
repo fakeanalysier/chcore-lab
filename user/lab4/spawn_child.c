@@ -36,7 +36,7 @@ int main(int argc, char *argv[], char *envp[])
 		fail_cond(ret < 0, "usys_map_pmo on copied pmo ret %d\n", ret);
 
 		info_page2 =
-		    (struct info_page *)(SHARED_PAGE_VADDR + PAGE_SIZE);
+			(struct info_page *)(SHARED_PAGE_VADDR + PAGE_SIZE);
 		printf("[Child] ");
 		for (i = 0; i < info_page2->nr_args - 1; i++) {
 			printf("%c", (char)info_page2->args[i]);

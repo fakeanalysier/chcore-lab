@@ -32,7 +32,7 @@ u32 uart_recv(void)
 
 u32 nb_uart_recv(void)
 {
-	if(uart_lsr() & 0x01)
+	if (uart_lsr() & 0x01)
 		return (get32(AUX_MU_IO_REG) & 0xFF);
 	else
 		return NB_UART_NRET;
@@ -60,10 +60,10 @@ void uart_init(void)
 	put32(AUX_MU_IIR_REG, 0xC6);
 	put32(AUX_MU_BAUD_REG, 270);
 	ra = get32(BCM2835_GPIO_GPFSEL1);
-	ra &= ~(7 << 12);	//gpio14
-	ra |= 2 << 12;		//alt5
-	ra &= ~(7 << 15);	//gpio15
-	ra |= 2 << 15;		//alt5
+	ra &= ~(7 << 12); //gpio14
+	ra |= 2 << 12; //alt5
+	ra &= ~(7 << 15); //gpio15
+	ra |= 2 << 15; //alt5
 	put32(BCM2835_GPIO_GPFSEL1, ra);
 	put32(BCM2835_GPIO_GPPUD, 0);
 	put32(BCM2835_GPIO_GPPUDCLK0, (1 << 14) | (1 << 15));

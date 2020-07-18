@@ -27,13 +27,11 @@
 
 #include "thread_env.h"
 
-static
-int thread_init(struct thread *thread, struct process *process,
-		u64 stack, u64 pc, u32 prio, u32 type, s32 aff)
+static int thread_init(struct thread *thread, struct process *process,
+		       u64 stack, u64 pc, u32 prio, u32 type, s32 aff)
 {
-	thread->process = obj_get(process, PROCESS_OBJ_ID,
-				  TYPE_PROCESS);
-	thread->vmspace   = obj_get(process, VMSPACE_OBJ_ID, TYPE_VMSPACE);
+	thread->process = obj_get(process, PROCESS_OBJ_ID, TYPE_PROCESS);
+	thread->vmspace = obj_get(process, VMSPACE_OBJ_ID, TYPE_VMSPACE);
 	obj_put(thread->process);
 	obj_put(thread->vmspace);
 	/* Thread context is used as the kernel stack for that thread */
@@ -87,7 +85,8 @@ void thread_deinit(void *thread_ptr)
 		process_exit(process);
 }
 
-int thread_create(struct process *process, u64 stack, u64 pc, u64 arg, u32 prio, u32 type, s32 aff)
+int thread_create(struct process *process, u64 stack, u64 pc, u64 arg, u32 prio,
+		  u32 type, s32 aff)
 {
 	struct thread *thread;
 	int cap, ret = 0;
@@ -102,7 +101,8 @@ int thread_create(struct process *process, u64 stack, u64 pc, u64 arg, u32 prio,
 		ret = -ENOMEM;
 		goto out_obj_put;
 	}
-	if ((ret = thread_init(thread, process, stack, pc, prio, type, aff)) != 0)
+	if ((ret = thread_init(thread, process, stack, pc, prio, type, aff)) !=
+	    0)
 		goto out_free_obj;
 	/* We should provide a separate syscall to set the affinity */
 	arch_set_thread_arg(thread, arg);
@@ -130,17 +130,15 @@ out_fail:
 	return ret;
 }
 
-#define PFLAGS2VMRFLAGS(PF)                                                    \
-	(((PF)&PF_X ? VMR_EXEC : 0) | ((PF)&PF_W ? VMR_WRITE : 0) |            \
+#define PFLAGS2VMRFLAGS(PF)                                         \
+	(((PF)&PF_X ? VMR_EXEC : 0) | ((PF)&PF_W ? VMR_WRITE : 0) | \
 	 ((PF)&PF_R ? VMR_READ : 0))
 
 #define OFFSET_MASK (0xFFF)
 
 /* load binary into some process (process) */
-static u64 load_binary(struct process *process,
-		       struct vmspace *vmspace,
-		       const char *bin,
-		       struct process_metadata *metadata)
+static u64 load_binary(struct process *process, struct vmspace *vmspace,
+		       const char *bin, struct process_metadata *metadata)
 {
 	struct elf_file *elf;
 	vmr_prop_t flags;
@@ -207,12 +205,12 @@ static u64 load_binary(struct process *process,
 
 	/* return binary metadata */
 	if (metadata != NULL) {
-		metadata->phdr_addr = elf->p_headers[0].p_vaddr +
-			            elf->header.e_phoff;
+		metadata->phdr_addr =
+			elf->p_headers[0].p_vaddr + elf->header.e_phoff;
 		metadata->phentsize = elf->header.e_phentsize;
-		metadata->phnum     = elf->header.e_phnum;
-		metadata->flags     = elf->header.e_flags;
-		metadata->entry     = elf->header.e_entry;
+		metadata->phnum = elf->header.e_phnum;
+		metadata->flags = elf->header.e_flags;
+		metadata->entry = elf->header.e_entry;
 	}
 
 	kfree((void *)bin);
@@ -233,16 +231,16 @@ out_fail:
 /* defined in page_table.S */
 extern void flush_idcache(void);
 
-extern void prepare_env(char *env, u64 top_vaddr,
-			struct process_metadata *meta, char *name);
+extern void prepare_env(char *env, u64 top_vaddr, struct process_metadata *meta,
+			char *name);
 
 /*
  * main_thread: the first thread in a process (process).
  * So, thread_create_main needs to load the code/data as well.
  */
-int thread_create_main(struct process *process, u64 stack_base,
-		       u64 stack_size, u32 prio, u32 type, s32 aff,
-		       const char *bin_start, char *bin_name)
+int thread_create_main(struct process *process, u64 stack_base, u64 stack_size,
+		       u32 prio, u32 type, s32 aff, const char *bin_start,
+		       char *bin_name)
 {
 	int ret, thread_cap, stack_pmo_cap;
 	struct thread *thread;
@@ -284,8 +282,8 @@ int thread_create_main(struct process *process, u64 stack_base,
 
 	pc = load_binary(process, init_vmspace, bin_start, &meta);
 
-	prepare_env((char *)phys_to_virt(stack_pmo->start) + stack_size,
-		    stack, &meta, bin_name);
+	prepare_env((char *)phys_to_virt(stack_pmo->start) + stack_size, stack,
+		    &meta, bin_name);
 	stack -= ENV_SIZE_ON_STACK;
 
 	ret = thread_init(thread, process, stack, pc, prio, type, aff);
@@ -321,7 +319,6 @@ void switch_thread_vmspace_to(struct thread *thread)
 	switch_vmspace_to(thread->vmspace);
 }
 
-
 /*
  * Syscalls
  */
@@ -348,10 +345,13 @@ void sys_exit(int ret)
  * create a thread in some process
  * return the thread_cap in the target process
  */
-int sys_create_thread(u64 process_cap, u64 stack, u64 pc, u64 arg, u32 prio, s32 aff)
+int sys_create_thread(u64 process_cap, u64 stack, u64 pc, u64 arg, u32 prio,
+		      s32 aff)
 {
-	struct process *process = obj_get(current_process, process_cap, TYPE_PROCESS);
-	int thread_cap = thread_create(process, stack, pc, arg, prio, TYPE_USER, aff);
+	struct process *process =
+		obj_get(current_process, process_cap, TYPE_PROCESS);
+	int thread_cap =
+		thread_create(process, stack, pc, arg, prio, TYPE_USER, aff);
 
 	obj_put(process);
 	return thread_cap;
@@ -385,7 +385,6 @@ int sys_set_affinity(u64 thread_cap, s32 aff)
 		obj_put((void *)thread);
 	return ret;
 }
-
 
 int sys_get_affinity(u64 thread_cap)
 {

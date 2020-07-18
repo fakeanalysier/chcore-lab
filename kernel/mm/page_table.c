@@ -34,7 +34,7 @@ void set_page_table(paddr_t pgtbl)
 	set_ttbr0_el1(pgtbl);
 }
 
-#define USER_PTE 0
+#define USER_PTE   0
 #define KERNEL_PTE 1
 /*
  * the 3rd arg means the kind of PTE.
@@ -53,7 +53,7 @@ static int set_pte_flags(pte_t *entry, vmr_prop_t flags, int kind)
 
 	// EL1 cannot directly execute EL0 accessiable region.
 	entry->l3_page.PXN = ARM64_MMU_ATTR_PAGE_PXN;
-	entry->l3_page.AF  = ARM64_MMU_ATTR_PAGE_AF_ACCESSED;
+	entry->l3_page.AF = ARM64_MMU_ATTR_PAGE_AF_ACCESSED;
 
 	// not global
 	//entry->l3_page.nG = 1;
@@ -84,8 +84,8 @@ static int set_pte_flags(pte_t *entry, vmr_prop_t flags, int kind)
  * alloc: if true, allocate a ptp when missing
  *
  */
-static int get_next_ptp(ptp_t *cur_ptp, u32 level, vaddr_t va,
-			ptp_t **next_ptp, pte_t **pte, bool alloc)
+static int get_next_ptp(ptp_t *cur_ptp, u32 level, vaddr_t va, ptp_t **next_ptp,
+			pte_t **pte, bool alloc)
 {
 	u32 index = 0;
 	pte_t *entry;
@@ -114,8 +114,7 @@ static int get_next_ptp(ptp_t *cur_ptp, u32 level, vaddr_t va,
 	if (IS_PTE_INVALID(entry->pte)) {
 		if (alloc == false) {
 			return -ENOMAPPING;
-		}
-		else {
+		} else {
 			/* alloc a new page table page */
 			ptp_t *new_ptp;
 			paddr_t new_ptp_paddr;
@@ -130,8 +129,8 @@ static int get_next_ptp(ptp_t *cur_ptp, u32 level, vaddr_t va,
 			new_pte_val.pte = 0;
 			new_pte_val.table.is_valid = 1;
 			new_pte_val.table.is_table = 1;
-			new_pte_val.table.next_table_addr
-				= new_ptp_paddr >> PAGE_SHIFT;
+			new_pte_val.table.next_table_addr = new_ptp_paddr >>
+							    PAGE_SHIFT;
 
 			/* same effect as: cur_ptp->ent[index] = new_pte_val; */
 			entry->pte = new_pte_val.pte;
@@ -182,14 +181,13 @@ int query_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
  * and it is convenient for you to call set_pte_flags to set the page
  * permission bit. Don't forget to call flush_tlb at the end of this function 
  */
-int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa,
-		       size_t len, vmr_prop_t flags)
+int map_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, paddr_t pa, size_t len,
+		       vmr_prop_t flags)
 {
-	//lab2: 
-	
+	//lab2:
+
 	return 0;
 }
-
 
 /*
  * unmap_range_in_pgtble: unmap the virtual address [va:va+len]
@@ -209,4 +207,3 @@ int unmap_range_in_pgtbl(vaddr_t *pgtbl, vaddr_t va, size_t len)
 
 	return 0;
 }
-

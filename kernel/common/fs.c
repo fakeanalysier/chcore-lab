@@ -40,10 +40,8 @@ int sys_fs_load_cpio(u64 vaddr)
 
 	vmspace = obj_get(current_process, VMSPACE_OBJ_ID, TYPE_VMSPACE);
 
-	ret = vmspace_map_range(vmspace, vaddr,
-				len, VMR_READ, cpio_pmo);
-	memcpy((void *)phys_to_virt(cpio_pmo->start),
-	       &binary_cpio_bin_start,
+	ret = vmspace_map_range(vmspace, vaddr, len, VMR_READ, cpio_pmo);
+	memcpy((void *)phys_to_virt(cpio_pmo->start), &binary_cpio_bin_start,
 	       binary_cpio_bin_size);
 
 	obj_put(vmspace);

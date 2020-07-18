@@ -7,7 +7,7 @@
 #include <sched/sched.h>
 #include <tests/tests.h>
 
-#define TEST_NUM 1
+#define TEST_NUM   1
 #define THREAD_NUM 8
 
 volatile int sched_start_flag = 0;
@@ -330,7 +330,7 @@ void tst_sched_timer(bool is_bsp)
 
 	global_barrier(is_bsp);
 
-	for (j=0;j<DEFAULT_BUDGET;j++){
+	for (j = 0; j < DEFAULT_BUDGET; j++) {
 		sched_handle_timer_irq();
 	}
 	sched();
@@ -341,9 +341,9 @@ void tst_sched_timer(bool is_bsp)
 	}
 
 	threads[0]->thread_ctx->sc->budget = 0;
-	for (j=0;j<DEFAULT_BUDGET;j++){
+	for (j = 0; j < DEFAULT_BUDGET; j++) {
 		sched_handle_timer_irq();
-	}	
+	}
 	sched();
 	for (i = 0; i < local_thread_num; i++) {
 		sched();
@@ -355,9 +355,9 @@ void tst_sched_timer(bool is_bsp)
 	sched();
 	BUG_ON(current_thread != threads[1]);
 
-	for (j=0;j<DEFAULT_BUDGET;j++){
+	for (j = 0; j < DEFAULT_BUDGET; j++) {
 		sched_handle_timer_irq();
-	}	
+	}
 	for (i = 0; i < local_thread_num; i++) {
 		sched();
 		BUG_ON(!current_thread->thread_ctx->sc);
@@ -503,10 +503,10 @@ void tst_sched(bool is_bsp)
 			BUG_ON(!current_thread->thread_ctx->sc);
 			/* Current thread set affinitiy */
 			current_thread->thread_ctx->affinity =
-			    (i + cpuid) % PLAT_CPU_NUM;
+				(i + cpuid) % PLAT_CPU_NUM;
 			check_thread_ctx();
 		}
-		if(smp_get_cpu_id() == 0) {
+		if (smp_get_cpu_id() == 0) {
 			printk(".");
 		}
 	}

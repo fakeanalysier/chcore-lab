@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
 
 	for (thread_i = 0; thread_i < THREAD_NUM; ++thread_i) {
 		start_flags[thread_i] = 0;
-		child_thread_cap =
-		    create_thread(thread_routine, thread_i, PRIO, thread_i % 4);
+		child_thread_cap = create_thread(thread_routine, thread_i, PRIO,
+						 thread_i % 4);
 		if (child_thread_cap < 0)
 			printf("Create thread failed, return %d\n",
 			       child_thread_cap);

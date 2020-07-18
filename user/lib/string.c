@@ -29,19 +29,16 @@ void strcpy(char *dst, const char *src)
 	}
 }
 
-u32
-strcmp(const char *p, const char *q)
+u32 strcmp(const char *p, const char *q)
 {
 	while (*p && *p == *q) {
 		p += 1;
 		q += 1;
 	}
-	return (u32) ((u8) *p - (u8) *q);
+	return (u32)((u8)*p - (u8)*q);
 }
 
-
-u32
-strncmp(const char *p, const char *q, size_t n)
+u32 strncmp(const char *p, const char *q, size_t n)
 {
 	while (n > 0 && *p && *p == *q) {
 		n -= 1;
@@ -51,5 +48,5 @@ strncmp(const char *p, const char *q, size_t n)
 	if (n == 0)
 		return 0;
 	else
-		return (u32) ((u8) *p - (u8) *q);
+		return (u32)((u8)*p - (u8)*q);
 }

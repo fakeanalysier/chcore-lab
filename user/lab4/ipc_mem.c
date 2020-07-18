@@ -8,9 +8,9 @@
 #include <lib/syscall.h>
 #include <lib/type.h>
 
-#define MAGIC_NUM 0xdeadbeef
+#define MAGIC_NUM         0xdeadbeef
 #define SHARED_PAGE_VADDR 0xa00000000
-#define CHILD_INFO_VADDR 0xb0000000 /* 2M */
+#define CHILD_INFO_VADDR  0xb0000000 /* 2M */
 
 int main(int argc, char *argv[], char *envp[])
 {

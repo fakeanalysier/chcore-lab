@@ -1,7 +1,7 @@
 #include "printf.h"
 #include "uart.h"
 
-#define MAX_INT_BUFF_SIZE  80
+#define MAX_INT_BUFF_SIZE 80
 
 static void write_string(const char *str)
 {
@@ -17,12 +17,11 @@ static void write_string(const char *str)
 // Remember the most significant digit is printed first.
 static void write_num(int base, unsigned long n, int neg)
 {
-  static const char hex[] = "0123456789abcdef";
-  char buff[MAX_INT_BUFF_SIZE];
-  // TODO: fill this function.
-  (void) buff;  // delete it 
-  (void) hex;  // delete it
-
+	static const char hex[] = "0123456789abcdef";
+	char buff[MAX_INT_BUFF_SIZE];
+	// TODO: fill this function.
+	(void)buff; // delete it
+	(void)hex; // delete it
 }
 
 void tfp_format(char *format, va_list args)

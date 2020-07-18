@@ -26,7 +26,7 @@ int ipc_register_client(int server_thread_cap, ipc_struct_t *ipc_struct);
 ipc_msg_t *ipc_create_msg(ipc_struct_t *icb, u64 data_len, u64 cap_slot_number);
 char *ipc_get_msg_data(ipc_msg_t *ipc_msg);
 u64 ipc_get_msg_cap(ipc_msg_t *ipc_msg, u64 cap_id);
-int ipc_set_msg_data(ipc_msg_t *ipc_msg, char* data, u64 offset, u64 len);
+int ipc_set_msg_data(ipc_msg_t *ipc_msg, char *data, u64 offset, u64 len);
 int ipc_set_msg_cap(ipc_msg_t *ipc_msg, u64 cap_slot_index, u32 cap);
 int ipc_destroy_msg(ipc_msg_t *ipc_msg);
 

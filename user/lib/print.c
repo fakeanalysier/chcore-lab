@@ -12,13 +12,13 @@
 
 #include <lib/syscall.h>
 
-#define MAX_INT_BUFF_SIZE  64
+#define MAX_INT_BUFF_SIZE 64
 
 typedef __builtin_va_list va_list;
-#define va_start(v,l)   __builtin_va_start(v,l)
-#define va_end(v)       __builtin_va_end(v)
-#define va_arg(v,l)     __builtin_va_arg(v,l)
-#define va_copy(d,s)    __builtin_va_copy(d,s)
+#define va_start(v, l) __builtin_va_start(v, l)
+#define va_end(v)      __builtin_va_end(v)
+#define va_arg(v, l)   __builtin_va_arg(v, l)
+#define va_copy(d, s)  __builtin_va_copy(d, s)
 
 static void print_write_string(const char *str)
 {
@@ -72,7 +72,7 @@ void print_format(char *format, va_list args)
 	for (i = 0; format[i] != 0; i++) {
 		/* Handle simple characters. */
 		if (!escape_mode && format[i] != '%') {
-			if ( format[i] == '\n' ){
+			if (format[i] == '\n') {
 				usys_putc('\r');
 				usys_putc('\n');
 			} else {
@@ -96,112 +96,112 @@ void print_format(char *format, va_list args)
 
 		/* Handle the modifier. */
 		switch (format[i]) {
-			/* Ignore printf modifiers we don't support. */
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-			case '-':
-			case '.':
-				break;
+		/* Ignore printf modifiers we don't support. */
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		case '-':
+		case '.':
+			break;
 
-				/* String. */
-			case 's':
-				s = va_arg(args, char *);
-				print_write_string(s);
-				escape_mode = 0;
-				break;
+			/* String. */
+		case 's':
+			s = va_arg(args, char *);
+			print_write_string(s);
+			escape_mode = 0;
+			break;
 
-				/* Pointers. */
-			case 'p':
-				p = va_arg(args, unsigned long);
-				print_write_num(16, p, 0);
-				escape_mode = 0;
-				break;
+			/* Pointers. */
+		case 'p':
+			p = va_arg(args, unsigned long);
+			print_write_num(16, p, 0);
+			escape_mode = 0;
+			break;
 
-				/* Hex number. */
-			case 'x':
-				d = va_arg(args, int);
-				print_write_num(16, d, 0);
-				escape_mode = 0;
-				break;
+			/* Hex number. */
+		case 'x':
+			d = va_arg(args, int);
+			print_write_num(16, d, 0);
+			escape_mode = 0;
+			break;
 
-				/* Decimal number. */
+			/* Decimal number. */
+		case 'd':
+			d = va_arg(args, int);
+			if (d >= 0)
+				print_write_num(10, d, 0);
+			else /* negtive number */
+				print_write_num(10, -d, 1);
+			escape_mode = 0;
+			break;
+		case 'u':
+			d = va_arg(args, int);
+			print_write_num(10, d, 0);
+			escape_mode = 0;
+			break;
+
+			/* Hex number. */
+		case 'b':
+			d = va_arg(args, int);
+			print_write_num(2, d, 0);
+			escape_mode = 0;
+			break;
+
+			/* Character. */
+		case 'c':
+			c = va_arg(args, int);
+			usys_putc(c);
+			escape_mode = 0;
+			break;
+
+			/* Long number. */
+		case 'l': {
+			int neg = 0;
+
+			l = va_arg(args, long);
+
+			switch (format[++i]) {
 			case 'd':
-				d = va_arg(args, int);
-				if (d >= 0)
-					print_write_num(10, d, 0);
-				else /* negtive number */
-					print_write_num(10, -d, 1);
-				escape_mode = 0;
+				base = 10;
+				if (l < 0) {
+					neg = 1;
+					l = -l;
+				}
 				break;
 			case 'u':
-				d = va_arg(args, int);
-				print_write_num(10, d, 0);
-				escape_mode = 0;
+				base = 10;
 				break;
 
-				/* Hex number. */
+			case 'x':
+				base = 16;
+				break;
+
 			case 'b':
-				d = va_arg(args, int);
-				print_write_num(2, d, 0);
-				escape_mode = 0;
+				base = 2;
 				break;
 
-				/* Character. */
-			case 'c':
-				c = va_arg(args, int);
-				usys_putc(c);
-				escape_mode = 0;
-				break;
-
-				/* Long number. */
-			case 'l': {
-				int neg = 0;
-
-				l = va_arg(args, long);
-
-				switch (format[++i]) {
-					case 'd':
-						base = 10;
-						if (l < 0) {
-							neg = 1;
-							l = -l;
-						}
-						break;
-					case 'u':
-						base = 10;
-						break;
-
-					case 'x':
-						base = 16;
-						break;
-
-					case 'b':
-						base = 2;
-						break;
-
-					default:
-						usys_putc('?');
-						continue;
-				}
-
-				print_write_num(base, l, neg);
-				escape_mode = 0;
-				break;
-			}
-
-				/* Unknown. */
 			default:
 				usys_putc('?');
-				escape_mode = 0;
-				break;
+				continue;
+			}
+
+			print_write_num(base, l, neg);
+			escape_mode = 0;
+			break;
+		}
+
+			/* Unknown. */
+		default:
+			usys_putc('?');
+			escape_mode = 0;
+			break;
 		}
 	}
 }
@@ -214,4 +214,3 @@ void printf(char *fmt, ...)
 	print_format(fmt, va);
 	va_end(va);
 }
-

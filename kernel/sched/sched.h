@@ -22,20 +22,20 @@
 struct thread;
 
 /* BUDGET represents the number of TICKs */
-#define DEFAULT_BUDGET	2
-#define TICK_MS		500
+#define DEFAULT_BUDGET 2
+#define TICK_MS        500
 
-#define MAX_PRIO	255
-#define MIN_PRIO	0
-#define PRIO_NUM	(MAX_PRIO + 1)
+#define MAX_PRIO 255
+#define MIN_PRIO 0
+#define PRIO_NUM (MAX_PRIO + 1)
 
-#define NO_AFF		-1
+#define NO_AFF -1
 
 /* Data structures */
 
-#define	STATE_STR_LEN	20
+#define STATE_STR_LEN 20
 enum thread_state {
-	TS_INIT	= 0,
+	TS_INIT = 0,
 	TS_READY,
 	/* intermediate stat used by sched */
 	TS_INTER,
@@ -47,7 +47,7 @@ enum thread_state {
 	TS_EXITING,
 };
 
-#define TYPE_STR_LEN	20
+#define TYPE_STR_LEN 20
 enum thread_type {
 	TYPE_IDLE = 0,
 	/* ROOT thread has all cap, it is also a user thread */
@@ -65,7 +65,7 @@ typedef struct sched_cont {
 
 /* size in registers.h (to be used in asm) */
 typedef struct arch_exec_cont {
-    u64 reg[REG_NUM];
+	u64 reg[REG_NUM];
 } arch_exec_cont_t;
 
 struct thread_ctx {
@@ -111,8 +111,8 @@ extern struct thread *current_threads[PLAT_CPU_NUM];
 struct sched_ops {
 	int (*sched_init)(void);
 	int (*sched)(void);
-	int (*sched_enqueue)(struct thread * thread);
-	int (*sched_dequeue)(struct thread * thread);
+	int (*sched_enqueue)(struct thread *thread);
+	int (*sched_dequeue)(struct thread *thread);
 	struct thread *(*sched_choose_thread)(void);
 	void (*sched_handle_timer_irq)(void);
 	/* Debug tools */
@@ -120,7 +120,7 @@ struct sched_ops {
 };
 
 /* Provided Scheduling Policies */
-extern struct sched_ops rr;	/* Simple Round Robin */
+extern struct sched_ops rr; /* Simple Round Robin */
 
 /* Chosen Scheduling Policies */
 extern struct sched_ops *cur_sched_ops;

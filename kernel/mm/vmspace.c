@@ -19,5 +19,3 @@ void arch_mm_init(void)
 {
 	cache_setup();
 }
-
-

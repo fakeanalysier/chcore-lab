@@ -6,10 +6,10 @@
 #include <lib/errno.h>
 #include <lib/string.h>
 
-#define kwarn printf
-#define cpio_info(fmt, ...) printf(fmt, ## __VA_ARGS__)
-#define cpio_zalloc(sz) calloc(1, sz)
-#define cpio_free(obj) free(obj)
+#define kwarn               printf
+#define cpio_info(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#define cpio_zalloc(sz)     calloc(1, sz)
+#define cpio_free(obj)      free(obj)
 
 static u64 hex8_u64(const char s[8])
 {
@@ -128,7 +128,7 @@ void *cpio_extract_single(const void *addr, const char *target,
 	/* Skip leading '/' */
 	target = target + 1;
 
-	for ( ; ; ) {
+	for (;;) {
 		int err;
 
 		err = cpio_parse_header(p, &header);
@@ -149,7 +149,6 @@ void *cpio_extract_single(const void *addr, const char *target,
 
 		p += header.c_filesize;
 		p = (void *)ALIGN4_UP(p);
-
 	}
 	return ERR_PTR(-ENOENT);
 }

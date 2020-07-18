@@ -109,7 +109,7 @@ static int create_connection(struct thread *source, struct thread *target,
 
 	// Create the server thread's stack
 	server_stack_base =
-	    vm_config->stack_base_addr + conn_idx * vm_config->stack_size;
+		vm_config->stack_base_addr + conn_idx * vm_config->stack_size;
 	stack_size = vm_config->stack_size;
 	kdebug("server stack base:%lx size:%lx\n", server_stack_base,
 	       stack_size);
@@ -126,7 +126,7 @@ static int create_connection(struct thread *source, struct thread *target,
 
 	// Create and map the shared buffer for client and server
 	server_buf_base =
-	    vm_config->buf_base_addr + conn_idx * vm_config->buf_size;
+		vm_config->buf_base_addr + conn_idx * vm_config->buf_size;
 	client_buf_base = client_vm_config->buf_base_addr;
 	buf_size = MIN(vm_config->buf_size, client_vm_config->buf_size);
 	client_vm_config->buf_size = buf_size;
@@ -155,7 +155,7 @@ static int create_connection(struct thread *source, struct thread *target,
 	}
 
 	server_conn_cap =
-	    cap_copy(current_process, target->process, conn_cap, 0, 0);
+		cap_copy(current_process, target->process, conn_cap, 0, 0);
 	if (server_conn_cap < 0) {
 		ret = server_conn_cap;
 		goto out_free_obj;
@@ -176,7 +176,7 @@ u32 sys_register_client(u32 server_cap, u64 vm_config_ptr)
 	struct thread *client = current_thread;
 	struct thread *server = NULL;
 	struct ipc_connection *conn;
-	struct ipc_vm_config vm_config = {0};
+	struct ipc_vm_config vm_config = { 0 };
 	u64 client_buf_size;
 	int conn_cap = 0;
 	int r = 0;

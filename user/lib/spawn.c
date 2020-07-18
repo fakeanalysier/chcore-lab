@@ -14,28 +14,28 @@ struct mt_info {
 
 /* An example to launch an (libc) application process */
 
-#define AT_NULL 0      /* end of vector */
-#define AT_IGNORE 1    /* entry should be ignored */
-#define AT_EXECFD 2    /* file descriptor of program */
-#define AT_PHDR 3      /* program headers for program */
-#define AT_PHENT 4     /* size of program header entry */
-#define AT_PHNUM 5     /* number of program headers */
-#define AT_PAGESZ 6    /* system page size */
-#define AT_BASE 7      /* base address of interpreter */
-#define AT_FLAGS 8     /* flags */
-#define AT_ENTRY 9     /* entry point of program */
-#define AT_NOTELF 10   /* program is not ELF */
-#define AT_UID 11      /* real uid */
-#define AT_EUID 12     /* effective uid */
-#define AT_GID 13      /* real gid */
-#define AT_EGID 14     /* effective gid */
+#define AT_NULL     0 /* end of vector */
+#define AT_IGNORE   1 /* entry should be ignored */
+#define AT_EXECFD   2 /* file descriptor of program */
+#define AT_PHDR     3 /* program headers for program */
+#define AT_PHENT    4 /* size of program header entry */
+#define AT_PHNUM    5 /* number of program headers */
+#define AT_PAGESZ   6 /* system page size */
+#define AT_BASE     7 /* base address of interpreter */
+#define AT_FLAGS    8 /* flags */
+#define AT_ENTRY    9 /* entry point of program */
+#define AT_NOTELF   10 /* program is not ELF */
+#define AT_UID      11 /* real uid */
+#define AT_EUID     12 /* effective uid */
+#define AT_GID      13 /* real gid */
+#define AT_EGID     14 /* effective gid */
 #define AT_PLATFORM 15 /* string identifying CPU for optimizations */
-#define AT_HWCAP 16    /* arch dependent hints at CPU capabilities */
-#define AT_CLKTCK 17   /* frequency at which times() increments */
+#define AT_HWCAP    16 /* arch dependent hints at CPU capabilities */
+#define AT_CLKTCK   17 /* frequency at which times() increments */
 /* AT_* values 18 through 22 are reserved */
 #define AT_SECURE 23 /* secure mode boolean */
-#define AT_BASE_PLATFORM                                                       \
-	24	   /* string identifying real platform, may                  \
+#define AT_BASE_PLATFORM \
+	24 /* string identifying real platform, may                  \
 		      * differ from AT_PLATFORM. */
 #define AT_RANDOM 25 /* address of 16 random bytes */
 #define AT_HWCAP2 26 /* extension of AT_HWCAP */
@@ -216,7 +216,7 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 	struct pmo_map_request pmo_map_requests[1];
 	int transfer_caps[MAX_NR_CAPS];
 	// Lab4 useless code, help avoid compile warning, you can delete it as you wish
-	transfer_caps[0] = 0; 
+	transfer_caps[0] = 0;
 
 	{
 		/**
@@ -259,7 +259,7 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		 * process.
 		 *  You do not need to modify code in this scope
 		 */
-		pmo_requests[0].size = LAB4_SPAWN_BLANK; 
+		pmo_requests[0].size = LAB4_SPAWN_BLANK;
 		pmo_requests[0].type = LAB4_SPAWN_BLANK;
 
 		ret = usys_create_pmos((void *)pmo_requests, 1);
@@ -314,7 +314,7 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		 * stack_offset is the offset from main thread's stack base to
 		 * that address.
 		 */
-		stack_top = LAB4_SPAWN_BLANK; 
+		stack_top = LAB4_SPAWN_BLANK;
 		stack_offset = LAB4_SPAWN_BLANK;
 
 		/* Construct the parameters on the top page of the stack */
@@ -348,8 +348,8 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		pmo_map_requests[0].addr = LAB4_SPAWN_BLANK;
 		pmo_map_requests[0].perm = LAB4_SPAWN_BLANK;
 
-		ret =
-		    usys_map_pmos(new_process_cap, (void *)pmo_map_requests, 1);
+		ret = usys_map_pmos(new_process_cap, (void *)pmo_map_requests,
+				    1);
 
 		if (ret != 0) {
 			printf("%s: fail to map_pmos (ret: %d)\n", __func__,
@@ -365,12 +365,12 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		 * Please fill the stack_va!
 		 */
 		stack_va = LAB4_SPAWN_BLANK;
-		main_thread_cap = usys_create_thread(
-		    new_process_cap, stack_va, pc,
-		    (u64)NULL, MAIN_THREAD_PRIO, aff);
+		main_thread_cap = usys_create_thread(new_process_cap, stack_va,
+						     pc, (u64)NULL,
+						     MAIN_THREAD_PRIO, aff);
 		if (main_thread_cap < 0) {
-			printf("%s: fail to create thread (ret: %d)\n", __func__,
-			       ret);
+			printf("%s: fail to create thread (ret: %d)\n",
+			       __func__, ret);
 			goto fail;
 		}
 	}
@@ -397,7 +397,8 @@ int spawn(char *path, int *new_process_cap, int *new_thread_cap,
 		return ret;
 	}
 
-	return launch_process_with_pmos_caps(
-	    &user_elf, new_process_cap, new_thread_cap, pmo_map_reqs,
-	    nr_pmo_map_reqs, caps, nr_caps, aff);
+	return launch_process_with_pmos_caps(&user_elf, new_process_cap,
+					     new_thread_cap, pmo_map_reqs,
+					     nr_pmo_map_reqs, caps, nr_caps,
+					     aff);
 }

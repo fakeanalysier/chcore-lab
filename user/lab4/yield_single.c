@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
 	for (thread_i = 0; thread_i < 2; ++thread_i) {
 		child_thread_cap =
-		    create_thread(thread_routine, thread_i, PRIO, 0);
+			create_thread(thread_routine, thread_i, PRIO, 0);
 		if (child_thread_cap < 0)
 			printf("Create thread failed, return %d\n",
 			       child_thread_cap);

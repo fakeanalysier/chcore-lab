@@ -30,24 +30,13 @@ struct thread *current_threads[PLAT_CPU_NUM];
 /* Chosen Scheduling Policies */
 struct sched_ops *cur_sched_ops;
 
-char thread_type[][TYPE_STR_LEN] = {
-	"IDLE  ",
-	"ROOT  ",
-	"USER  ",
-	"SHADOW",
-	"KERNEL",
-	"TESTS "
-};
+char thread_type[][TYPE_STR_LEN] = { "IDLE  ", "ROOT  ", "USER  ",
+				     "SHADOW", "KERNEL", "TESTS " };
 
-char thread_state[][STATE_STR_LEN] = {
-	"TS_INIT      ",
-	"TS_READY     ",
-	"TS_INTER     ",
-	"TS_RUNNING   ",
-	"TS_EXIT      ",
-	"TS_WAITING   ",
-	"TS_EXITING   "
-};
+char thread_state[][STATE_STR_LEN] = { "TS_INIT      ", "TS_READY     ",
+				       "TS_INTER     ", "TS_RUNNING   ",
+				       "TS_EXIT      ", "TS_WAITING   ",
+				       "TS_EXITING   " };
 
 void arch_idle_ctx_init(struct thread_ctx *idle_ctx, void (*func)(void))
 {
@@ -61,19 +50,16 @@ void arch_idle_ctx_init(struct thread_ctx *idle_ctx, void (*func)(void))
 	/* SPSR_EL1 => Exit to EL1 */
 	ec->reg[SPSR_EL1] = SPSR_EL1_KERNEL;
 	/* ELR_EL1 => Next PC */
-	ec->reg[ELR_EL1] = (u64) func;
+	ec->reg[ELR_EL1] = (u64)func;
 }
 
 void print_thread(struct thread *thread)
 {
 	printk("Thread %p\tType: %s\tState: %s\tCPU %d\tAFF %d\tBudget %d\tPrio: %d\t\n",
-		thread,
-		thread_type[thread->thread_ctx->type],
-		thread_state[thread->thread_ctx->state],
-		thread->thread_ctx->cpuid,
-		thread->thread_ctx->affinity,
-		thread->thread_ctx->sc->budget,
-		thread->thread_ctx->prio);
+	       thread, thread_type[thread->thread_ctx->type],
+	       thread_state[thread->thread_ctx->state],
+	       thread->thread_ctx->cpuid, thread->thread_ctx->affinity,
+	       thread->thread_ctx->sc->budget, thread->thread_ctx->prio);
 }
 
 int sched_is_running(struct thread *target)
@@ -121,12 +107,10 @@ u64 switch_context(void)
 	BUG_ON(!target_thread);
 	BUG_ON(!target_thread->thread_ctx);
 
-
 	/* These 3 types of thread do not have vmspace */
 	if (target_thread->thread_ctx->type != TYPE_IDLE &&
-		target_thread->thread_ctx->type != TYPE_KERNEL &&
-		target_thread->thread_ctx->type != TYPE_TESTS) {
-
+	    target_thread->thread_ctx->type != TYPE_KERNEL &&
+	    target_thread->thread_ctx->type != TYPE_TESTS) {
 		BUG_ON(!target_thread->vmspace);
 		/*
 		* Recording the CPU the thread runs on: for TLB maintainence.

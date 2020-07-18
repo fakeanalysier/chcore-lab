@@ -23,7 +23,6 @@
 #include <sched/context.h>
 #include <sched/sched.h>
 
-
 /**
  * Lab 4
  * Helper function

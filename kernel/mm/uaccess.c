@@ -21,7 +21,6 @@
  * But, El1 cannot execute EL0 code.
  */
 
-
 int copy_from_user(char *kernel_buf, char *user_buf, size_t size)
 {
 	/* validate user_buf */

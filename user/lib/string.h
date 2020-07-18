@@ -10,4 +10,3 @@ void strcpy(char *dst, const char *src);
 u32 strcmp(const char *s1, const char *s2);
 
 u32 strncmp(const char *s1, const char *s2, size_t size);
-

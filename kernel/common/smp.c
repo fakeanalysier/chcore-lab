@@ -17,8 +17,8 @@
 #include <common/vars.h>
 #include <common/mm.h>
 
-volatile char cpu_status[PLAT_CPU_NUM] = {cpu_hang, cpu_hang, cpu_hang,
-					  cpu_hang};
+volatile char cpu_status[PLAT_CPU_NUM] = { cpu_hang, cpu_hang, cpu_hang,
+					   cpu_hang };
 
 void enable_smp_cores(void *addr)
 {
@@ -44,7 +44,7 @@ void enable_smp_cores(void *addr)
 		 * before activating the next one
 		 */
 	}
-	
+
 	/* This information is printed when all CPUs finish their initialization */
 	kinfo("All %d CPUs are active\n", PLAT_CPU_NUM);
 }
