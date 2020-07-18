@@ -36,7 +36,7 @@ u64 syscall(u64 sys_no, u64 arg0, u64 arg1, u64 arg2, u64 arg3, u64 arg4,
  */
 void usys_putc(char ch)
 {
-	syscall(SYS_putc, ch, 1, 2, 3, 4, 5, 6, 7);
+	syscall(SYS_putc, ch, 0, 0, 0, 0, 0, 0, 0);
 }
 
 void usys_exit(int ret)
