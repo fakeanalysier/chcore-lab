@@ -31,7 +31,7 @@ char kernel_stack[PLAT_CPU_NUM][KERNEL_STACK_SIZE];
 int mon_backtrace();
 
 // Test the stack backtrace function (lab 1 only)
-void test_backtrace(long x)
+__attribute__((optimize("O1"))) void test_backtrace(long x)
 {
 	kinfo("entering test_backtrace %d\n", x);
 	if (x > 0)

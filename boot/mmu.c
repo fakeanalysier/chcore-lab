@@ -31,6 +31,7 @@ typedef unsigned long vaddr_t;
 typedef unsigned long uint64_t;
 typedef unsigned long uintptr_t;
 
+// 类似 Linux 的四级页表
 /* Paging structures for kernel mapping */
 uint64_t _boot_pgd_up[BIT(PGD_BITS)] ALIGN(BIT(PGD_SIZE_BITS));
 uint64_t _boot_pud_up[BIT(PUD_BITS)] ALIGN(BIT(PUD_SIZE_BITS));
@@ -79,6 +80,7 @@ void init_boot_pt(void)
 			| BIT(0); /* 1G block */
 	}
 
+	// 映射内核虚拟地址 KERNEL_VADDR 到物理地址 0
 	_boot_pgd_up[GET_PGD_INDEX(first_vaddr)] = ((uintptr_t)_boot_pud_up) |
 						   BIT(1) | BIT(0);
 
@@ -86,24 +88,27 @@ void init_boot_pt(void)
 						   BIT(1) | BIT(0);
 	printf("index %lx\n", GET_PUD_INDEX(first_vaddr));
 	printf("_boot_pgd_up is %lx\n", _boot_pgd_up);
-	//0~128m
+
+	//0~128M
 	for (i = 0; i < 64; ++i) {
 		_boot_pmd_up[i] = ((i << ARM_2MB_BLOCK_BITS) + first_paddr) |
 				  BIT(54) | BIT(10) /* access flag */
 				  | (3 << 8) /* shareability */
 				  | (4 << 2) /* MT_NORMAL memory */
-				  | BIT(0); /* 1G block */
+				  | BIT(0); /* 2M block */
 	}
 
-	//128~1G
+	//256M~1G
 	for (i = 128; i < 512; ++i) {
 		_boot_pmd_up[i] = ((i << ARM_2MB_BLOCK_BITS) + first_paddr) |
 				  BIT(54) /* UXN */
 				  | BIT(10) /* access flag */
 				  |
 				  (0 << 2) /* strongly ordered device memory */
-				  | BIT(0); /* 1G block */
+				  | BIT(0); /* 2M block */
 	}
+
+	//1G~4G
 	for (i = 1; i < 4; ++i) {
 		_boot_pud_up[i] = (i << ARM_1GB_BLOCK_BITS) | BIT(54) /* UXN */
 				  | BIT(10) /* access flag */
