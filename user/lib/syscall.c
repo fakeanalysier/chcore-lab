@@ -3,7 +3,7 @@
 #include <lib/type.h>
 
 u64 syscall(u64 sys_no, u64 arg0, u64 arg1, u64 arg2, u64 arg3, u64 arg4,
-	    u64 arg5, u64 arg6, u64 arg7)
+	    u64 arg5, u64 arg6, u64 arg7, u64 arg8)
 {
 	u64 ret = 0;
 	/*
@@ -36,28 +36,28 @@ u64 syscall(u64 sys_no, u64 arg0, u64 arg1, u64 arg2, u64 arg3, u64 arg4,
  */
 void usys_putc(char ch)
 {
-	syscall(SYS_putc, ch, 0, 0, 0, 0, 0, 0, 0);
+	syscall(SYS_putc, ch, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 void usys_exit(int ret)
 {
-	syscall(SYS_exit, ret, 0, 0, 0, 0, 0, 0, 0);
+	syscall(SYS_exit, ret, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 int usys_create_pmo(u64 size, u64 type)
 {
-	return syscall(SYS_create_pmo, size, type, 0, 0, 0, 0, 0, 0);
+	return syscall(SYS_create_pmo, size, type, 0, 0, 0, 0, 0, 0, 0);
 }
 
 int usys_map_pmo(u64 process_cap, u64 pmo_cap, u64 addr, u64 rights)
 {
 	return syscall(SYS_map_pmo, process_cap, pmo_cap, addr, rights, 0, 0, 0,
-		       0);
+		       0, 0);
 }
 
 u64 usys_handle_brk(u64 addr)
 {
-	return syscall(SYS_handle_brk, addr, 0, 0, 0, 0, 0, 0, 0);
+	return syscall(SYS_handle_brk, addr, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 /* Here finishes all syscalls need by lab3 */
