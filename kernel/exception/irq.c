@@ -36,6 +36,8 @@ void handle_irq(int type)
 	 *	The irq is not from the kernel
 	 * 	Or the thread being interrupted is an idle thread in the kernel.
 	 */
+	if (type >= SYNC_EL0_64)
+		lock_kernel();
 
 	plat_handle_irq();
 

@@ -91,6 +91,7 @@
  * 	unlock the big kernel lock before returning to the user mode
  */
 .macro	exception_return
+	bl	unlock_kernel
 	exception_exit
 .endm
 
@@ -197,7 +198,7 @@ el0_syscall:
 	stp	x12, x13, [sp, #16 * 6]
 	stp	x14, x15, [sp, #16 * 7]
 
-	bl lock_kernel
+	bl	lock_kernel
 
 	ldp	x0, x1, [sp, #16 * 0]
 	ldp	x2, x3, [sp, #16 * 1]
