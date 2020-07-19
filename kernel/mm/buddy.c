@@ -126,7 +126,7 @@ static struct page *__alloc_page(struct global_mem *zone, u64 order)
 		return NULL;
 
 	struct list_head *node = list->list_head.next;
-	struct page *page = ln2page(node);
+	struct page *page = container_of(node, struct page, list_node);
 	list_del(node);
 	list->nr_free--;
 	if (get_order(page) > order)
