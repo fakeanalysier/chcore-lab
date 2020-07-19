@@ -42,17 +42,17 @@ void lock(struct lock *lock)
 	/** 
 	 * The following asm code means:
 	 * 
-	 * lock->next = fetch_and_add(1);
-	 * while(lock->next != lock->owner);
-     */
+	 * lockval = fetch_and_add(&lock->next, 1);
+	 * while(lockval != lock->owner);
+	*/
 	asm volatile("       prfm    pstl1strm, %3\n"
-		     "1:     ldaxr   %w0, %3\n"
-		     "       add     %w1, %w0, #0x1\n"
+		     "1:     ldaxr   %w0, %3\n" // fetch
+		     "       add     %w1, %w0, #0x1\n" // and add
 		     "       stxr    %w2, %w1, %3\n"
-		     "       cbnz    %w2, 1b\n"
-		     "2:     ldar    %w2, %4\n"
-		     "       cmp     %w0, %w2\n"
-		     "       b.ne    2b\n"
+		     "       cbnz    %w2, 1b\n" // ret != 0, retry
+		     "2:     ldar    %w2, %4\n" // get lock->owner
+		     "       cmp     %w0, %w2\n" // cmp lockval and lock->owner
+		     "       b.ne    2b\n" // loop
 		     : "=&r"(lockval), "=&r"(newval), "=&r"(ret),
 		       "+Q"(lock->next)
 		     : "Q"(lock->owner)
@@ -101,6 +101,7 @@ void unlock(struct lock *lock)
 	 * Unlock the ticket lock here
 	 * Your code should be no more than 5 lines
 	*/
+	lock->owner++;
 }
 
 /** 
@@ -111,7 +112,7 @@ void unlock(struct lock *lock)
 */
 int is_locked(struct lock *lock)
 {
-	return -1;
+	return lock->owner != lock->next;
 }
 
 /**
