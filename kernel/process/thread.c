@@ -359,7 +359,7 @@ void sys_exit(int ret)
 	/* Set current running thread to NULL */
 	current_threads[cpuid] = NULL;
 	/* Reschedule */
-	cur_sched_ops->sched();
+	sched();
 	eret_to_thread(switch_context());
 }
 

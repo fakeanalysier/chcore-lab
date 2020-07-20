@@ -136,7 +136,7 @@ u64 switch_context(void)
  */
 void sys_yield(void)
 {
-	cur_sched_ops->sched();
+	sched();
 	eret_to_thread(switch_context());
 }
 
