@@ -125,12 +125,16 @@ int rr_sched(void)
 {
 	struct thread *thread = current_thread;
 	if (thread && thread->thread_ctx &&
-	    thread->thread_ctx->state == TS_RUNNING)
+	    thread->thread_ctx->state == TS_RUNNING) {
+		if (thread->thread_ctx->sc->budget != 0)
+			return 0;
 		rr_sched_enqueue(thread);
+	}
 
 	thread = rr_sched_choose_thread();
 	if (!thread || !thread->thread_ctx)
 		return -EINVAL;
+	thread->thread_ctx->sc->budget = DEFAULT_BUDGET;
 	switch_to_thread(thread);
 	return 0;
 }
@@ -173,7 +177,10 @@ int rr_sched_init(void)
  */
 void rr_sched_handle_timer_irq(void)
 {
-	rr_sched();
+	if (current_thread && current_thread->thread_ctx &&
+	    current_thread->thread_ctx->sc &&
+	    current_thread->thread_ctx->sc->budget != 0)
+		current_thread->thread_ctx->sc->budget--;
 }
 
 struct sched_ops rr = {
