@@ -173,6 +173,7 @@ int rr_sched_init(void)
  */
 void rr_sched_handle_timer_irq(void)
 {
+	rr_sched();
 }
 
 struct sched_ops rr = {

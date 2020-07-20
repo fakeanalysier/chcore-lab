@@ -86,4 +86,5 @@ void plat_enable_timer(void)
 void handle_timer_irq(void)
 {
 	plat_handle_timer_irq();
+	sched_handle_timer_irq();
 }
