@@ -32,7 +32,10 @@ void exception_init_per_cpu(void)
 	 * Uncomment the timer_init() when you are handling preemptive
 	 * shceduling
 	 */
+	// should not init timer when doing kernel tests
+#ifdef TEST
 	timer_init();
+#endif
 
 	/**
 	 * Lab3: Your code here
