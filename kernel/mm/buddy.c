@@ -116,7 +116,7 @@ static struct page *__alloc_page(struct global_mem *zone, u64 order)
 {
 	//lab2
 	// assert: order is valid
-	struct free_list *list = zone->free_lists;
+	struct free_list *list = &zone->free_lists[order];
 	struct free_list *free_lists_end = &zone->free_lists[BUDDY_MAX_ORDER];
 	while (list->nr_free == 0 && list != free_lists_end) {
 		// keep searching for a free block that is big enough
