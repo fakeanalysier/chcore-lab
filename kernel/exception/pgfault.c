@@ -91,6 +91,7 @@ int handle_trans_fault(struct vmspace *vmspace, vaddr_t fault_addr)
 	if (!page_va)
 		return -ENOMAPPING;
 	pa = virt_to_phys(page_va);
+	commit_page_to_pmo(pmo, ROUND_DOWN(fault_addr, PAGE_SIZE), pa);
 	ret = map_range_in_pgtbl(vmspace->pgtbl,
 				 ROUND_DOWN(fault_addr, PAGE_SIZE), pa,
 				 PAGE_SIZE, vmr->perm);
