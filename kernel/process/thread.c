@@ -388,7 +388,7 @@ int sys_create_thread(u64 process_cap, u64 stack, u64 pc, u64 arg, u32 prio,
 int sys_set_affinity(u64 thread_cap, s32 aff)
 {
 	struct thread *thread = NULL;
-	int cpuid = smp_get_cpu_id(), ret = 0;
+	int cpuid = smp_get_cpu_id();
 
 	/* currently, we use -1 to represent the current thread */
 	if (thread_cap == -1) {
@@ -402,10 +402,13 @@ int sys_set_affinity(u64 thread_cap, s32 aff)
 	* Lab 4
 	* Finish the sys_set_affinity
 	*/
+	if (!thread || !thread->thread_ctx)
+		return -1;
+	thread->thread_ctx->affinity = aff;
 
 	if (thread_cap != -1)
 		obj_put((void *)thread);
-	return ret;
+	return 0;
 }
 
 int sys_get_affinity(u64 thread_cap)
@@ -426,6 +429,9 @@ int sys_get_affinity(u64 thread_cap)
 	* Lab 4
 	* Finish the sys_get_affinity
 	*/
+	if (!thread || !thread->thread_ctx)
+		return -1;
+	aff = thread->thread_ctx->affinity;
 
 	if (thread_cap != -1)
 		obj_put((void *)thread);
