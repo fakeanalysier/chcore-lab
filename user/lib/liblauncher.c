@@ -12,7 +12,7 @@
 #define VMR_WRITE (1 << 1)
 #define VMR_EXEC  (1 << 2)
 
-#define PFLAGS2VMRFLAGS(PF) \
+#define PFLAGS2VMRFLAGS(PF)                                         \
 	(((PF)&PF_X ? VMR_EXEC : 0) | ((PF)&PF_W ? VMR_WRITE : 0) | \
 	 ((PF)&PF_R ? VMR_READ : 0))
 
@@ -45,16 +45,14 @@ int parse_elf_from_binary(const char *binary, struct user_elf *user_elf)
 		p_vaddr = elf.p_headers[i].p_vaddr;
 		BUG_ON(elf.p_headers[i].p_filesz > seg_sz);
 		seg_map_sz = ROUND_UP(seg_sz + p_vaddr, PAGE_SIZE) -
-			ROUND_DOWN(p_vaddr, PAGE_SIZE);
+			     ROUND_DOWN(p_vaddr, PAGE_SIZE);
 
 		user_elf->user_elf_seg[j].elf_pmo =
 			usys_create_pmo(seg_map_sz, PMO_DATA);
 		BUG_ON(user_elf->user_elf_seg[j].elf_pmo < 0);
 
-		ret = usys_map_pmo(SELF_CAP,
-				   user_elf->user_elf_seg[j].elf_pmo,
-				   tmp_vaddr,
-				   VM_READ | VM_WRITE);
+		ret = usys_map_pmo(SELF_CAP, user_elf->user_elf_seg[j].elf_pmo,
+				   tmp_vaddr, VM_READ | VM_WRITE);
 		BUG_ON(ret < 0);
 
 		memset((void *)tmp_vaddr, 0, seg_map_sz);
@@ -65,24 +63,22 @@ int parse_elf_from_binary(const char *binary, struct user_elf *user_elf)
 		 *
 		 */
 		memcpy((void *)tmp_vaddr +
-		       (elf.p_headers[i].p_vaddr & OFFSET_MASK),
-		       (void *)(binary +
-				elf.p_headers[i].p_offset),
+			       (elf.p_headers[i].p_vaddr & OFFSET_MASK),
+		       (void *)(binary + elf.p_headers[i].p_offset),
 		       elf.p_headers[i].p_filesz);
 
 		user_elf->user_elf_seg[j].seg_sz = seg_sz;
 		user_elf->user_elf_seg[j].p_vaddr = p_vaddr;
 		user_elf->user_elf_seg[j].flags =
 			PFLAGS2VMRFLAGS(elf.p_headers[i].p_flags);
-		usys_unmap_pmo(SELF_CAP,
-			       user_elf->user_elf_seg[j].elf_pmo,
+		usys_unmap_pmo(SELF_CAP, user_elf->user_elf_seg[j].elf_pmo,
 			       tmp_vaddr);
 
 		j++;
 	}
 
-	user_elf->elf_meta.phdr_addr = elf.p_headers[0].p_vaddr +
-		elf.header.e_phoff;
+	user_elf->elf_meta.phdr_addr =
+		elf.p_headers[0].p_vaddr + elf.header.e_phoff;
 	user_elf->elf_meta.phentsize = elf.header.e_phentsize;
 	user_elf->elf_meta.phnum = elf.header.e_phnum;
 	user_elf->elf_meta.flags = elf.header.e_flags;
@@ -96,7 +92,7 @@ void *single_file_handler(const void *start, size_t size, void *data)
 	struct user_elf *user_elf = data;
 	void *ret;
 
-	ret = (void *)(s64) parse_elf_from_binary(start, user_elf);
+	ret = (void *)(s64)parse_elf_from_binary(start, user_elf);
 	return ret;
 }
 
@@ -105,8 +101,8 @@ int readelf_from_kernel_cpio(const char *filename, struct user_elf *user_elf)
 	int ret;
 
 	strcpy(user_elf->path, filename);
-	ret = (int)(s64) cpio_extract_single((void *)CPIO_BIN, filename,
-					     single_file_handler, user_elf);
+	ret = (int)(s64)cpio_extract_single((void *)CPIO_BIN, filename,
+					    single_file_handler, user_elf);
 
 	return ret;
 }
@@ -120,8 +116,7 @@ int readelf_from_fs(const char *pathbuf, struct user_elf *user_elf)
 	int ret;
 	int tmpfs_read_pmo_cap;
 
-  // TODO(Lab5): your code here
+	// TODO(Lab5): your code here
 
 	return ret;
 }
-

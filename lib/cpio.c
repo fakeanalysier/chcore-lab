@@ -17,9 +17,9 @@
 #include <common/kmalloc.h>
 #include <lib/errno.h>
 
-#define cpio_info(fmt, ...) kdebug(fmt, ## __VA_ARGS__)
-#define cpio_zalloc(sz) kzalloc(sz)
-#define cpio_free(obj) kfree(obj)
+#define cpio_info(fmt, ...) kdebug(fmt, ##__VA_ARGS__)
+#define cpio_zalloc(sz)     kzalloc(sz)
+#define cpio_free(obj)      kfree(obj)
 
 static u64 hex8_u64(const char s[8])
 {
@@ -56,7 +56,7 @@ static int cpio_parse_header(const void *addr, struct cpio_header *header)
 	header->c_namesize = hex8_u64(newc->c_namesize);
 	header->c_check = hex8_u64(newc->c_check);
 
-	cpio_info("header address is 0x%lx\n", (u64) header);
+	cpio_info("header address is 0x%lx\n", (u64)header);
 	return 0;
 }
 
@@ -91,7 +91,7 @@ void cpio_extract(const void *addr, const char *dirat)
 	struct cpio_file *f;
 	int err;
 
-	for ( ; ; ) {
+	for (;;) {
 		f = cpio_alloc_file();
 		if (f == NULL) {
 			kwarn("cpio_alloc_file fails due to lack of memory.\n");
@@ -121,7 +121,6 @@ void cpio_extract(const void *addr, const char *dirat)
 	}
 }
 
-
 void *cpio_extract_single(const void *addr, const char *target,
 			  void *(*cpio_single_file_filler)(const void *start,
 							   size_t size,
@@ -135,7 +134,7 @@ void *cpio_extract_single(const void *addr, const char *target,
 	/* Skip leading '/' */
 	target = target + 1;
 
-	for ( ; ; ) {
+	for (;;) {
 		int err;
 
 		err = cpio_parse_header(p, &header);
@@ -156,7 +155,6 @@ void *cpio_extract_single(const void *addr, const char *target,
 
 		p += header.c_filesize;
 		p = (void *)ALIGN4_UP(p);
-
 	}
 	return ERR_PTR(-ENOENT);
 }

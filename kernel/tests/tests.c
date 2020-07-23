@@ -17,7 +17,7 @@ void run_test(bool is_bsp)
 {
 	if (is_bsp)
 		kinfo("[ChCore] kernel tests\n");
-	
+
 	tst_mutex(is_bsp);
 	tst_big_lock(is_bsp);
 
@@ -26,7 +26,7 @@ void run_test(bool is_bsp)
 	tst_sched_affinity(is_bsp);
 	tst_sched(is_bsp);
 
-	if (is_bsp){
+	if (is_bsp) {
 		kinfo("[ChCore] pass all kernel tests\n");
 	}
 }

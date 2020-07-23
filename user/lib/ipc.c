@@ -27,7 +27,7 @@ char *ipc_get_msg_data(ipc_msg_t *ipc_msg)
 	return (char *)ipc_msg + ipc_msg->data_offset;
 }
 
-int ipc_set_msg_data(ipc_msg_t *ipc_msg, char* data, u64 offset, u64 len)
+int ipc_set_msg_data(ipc_msg_t *ipc_msg, char *data, u64 offset, u64 len)
 {
 	if (offset + len < offset || offset + len > ipc_msg->data_len)
 		return -1;
@@ -62,21 +62,21 @@ int ipc_destroy_msg(ipc_msg_t *ipc_msg)
 	return 0;
 }
 
-#define SERVER_STACK_BASE	0x7000000
-#define SERVER_STACK_SIZE	0x1000
-#define SERVER_BUF_BASE		0x7400000
-#define SERVER_BUF_SIZE		0x1000
-#define CLIENT_BUF_BASE		0x7800000
-#define CLIENT_BUF_SIZE		0x1000
-#define MAX_CLIENT		16
+#define SERVER_STACK_BASE 0x7000000
+#define SERVER_STACK_SIZE 0x1000
+#define SERVER_BUF_BASE   0x7400000
+#define SERVER_BUF_SIZE   0x1000
+#define CLIENT_BUF_BASE   0x7800000
+#define CLIENT_BUF_SIZE   0x1000
+#define MAX_CLIENT        16
 
 int ipc_register_server(server_handler server_handler)
 {
 	struct ipc_vm_config vm_config = {
-		.stack_base_addr	= SERVER_STACK_BASE,
-		.stack_size		= SERVER_STACK_SIZE,
-		.buf_base_addr		= SERVER_BUF_BASE,
-		.buf_size		= SERVER_BUF_SIZE,
+		.stack_base_addr = SERVER_STACK_BASE,
+		.stack_size = SERVER_STACK_SIZE,
+		.buf_base_addr = SERVER_BUF_BASE,
+		.buf_size = SERVER_BUF_SIZE,
 	};
 	return usys_register_server((u64)server_handler, MAX_CLIENT,
 				    (u64)&vm_config);
@@ -87,12 +87,12 @@ int ipc_register_client(int server_thread_cap, ipc_struct_t *ipc_struct)
 	int conn_cap;
 
 	struct ipc_vm_config vm_config = {
-		.buf_base_addr	= CLIENT_BUF_BASE,
-		.buf_size	= CLIENT_BUF_SIZE,
+		.buf_base_addr = CLIENT_BUF_BASE,
+		.buf_size = CLIENT_BUF_SIZE,
 	};
 
-	conn_cap = usys_register_client((u32)server_thread_cap,
-					(u64)&vm_config);
+	conn_cap =
+		usys_register_client((u32)server_thread_cap, (u64)&vm_config);
 
 	if (conn_cap < 0)
 		return -1;
@@ -118,7 +118,6 @@ int ipc_reg_call(ipc_struct_t *icb, u64 arg)
 
 	return ret;
 }
-
 
 void ipc_return(int ret)
 {

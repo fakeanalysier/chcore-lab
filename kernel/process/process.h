@@ -30,10 +30,10 @@ struct object_slot {
 	struct list_head copies;
 };
 
-#define BASE_OBJECT_NUM		BITS_PER_LONG
+#define BASE_OBJECT_NUM BITS_PER_LONG
 /* 1st cap is process. 2nd cap is vmspace */
-#define PROCESS_OBJ_ID		0
-#define VMSPACE_OBJ_ID		1
+#define PROCESS_OBJ_ID 0
+#define VMSPACE_OBJ_ID 1
 
 struct slot_table {
 	unsigned int slots_size;
@@ -69,8 +69,7 @@ static inline void free_slot_id(struct process *process, int slot_id)
 	slot_table->slots[slot_id] = NULL;
 }
 
-static inline struct object_slot *get_slot(struct process *process,
-					   int slot_id)
+static inline struct object_slot *get_slot(struct process *process, int slot_id)
 {
 	if (slot_id < 0 || slot_id >= process->slot_table.slots_size)
 		return NULL;
@@ -87,4 +86,3 @@ static inline void install_slot(struct process *process, int slot_id,
 bool is_valid_slot_id(struct slot_table *slot_table, int slot_id);
 
 void process_exit(struct process *process);
-

@@ -10,10 +10,10 @@ static void fs_dispatch(ipc_msg_t *ipc_msg)
 	int ret = 0;
 
 	if (ipc_msg->data_len >= 4) {
-		struct fs_request *fr = (struct fs_request *)
-					ipc_get_msg_data(ipc_msg);
-		switch(fr->req) {
-      // TODO(Lab5): your code here
+		struct fs_request *fr =
+			(struct fs_request *)ipc_get_msg_data(ipc_msg);
+		switch (fr->req) {
+			// TODO(Lab5): your code here
 
 		default:
 			error("%s: %d Not impelemented yet\n", __func__,
@@ -21,8 +21,7 @@ static void fs_dispatch(ipc_msg_t *ipc_msg)
 			usys_exit(-1);
 			break;
 		}
-	}
-	else {
+	} else {
 		printf("TMPFS: no operation num\n");
 		usys_exit(-1);
 	}
@@ -32,7 +31,7 @@ static void fs_dispatch(ipc_msg_t *ipc_msg)
 
 int main(int argc, char *argv[], char *envp[])
 {
-	void *info_page_addr = (void *)(long) TMPFS_INFO_VADDR;
+	void *info_page_addr = (void *)(long)TMPFS_INFO_VADDR;
 	// void *info_page_addr = (void *) (envp[0]);
 	int *server_ready_flag;
 	int *server_exit_flag;
@@ -44,9 +43,8 @@ int main(int argc, char *argv[], char *envp[])
 		usys_exit(-1);
 	}
 
-  fs_server_init(CPIO_BIN);
-	info("register server value = %u\n",
-	     ipc_register_server(fs_dispatch));
+	fs_server_init(CPIO_BIN);
+	info("register server value = %u\n", ipc_register_server(fs_dispatch));
 
 	server_ready_flag = info_page_addr + server_ready_flag_offset;
 	*server_ready_flag = 1;

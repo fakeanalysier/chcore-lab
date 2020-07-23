@@ -14,7 +14,7 @@
 
 #include <common/types.h>
 
-#define SLAB_INIT_SIZE (2*1024*1024) //2M
+#define SLAB_INIT_SIZE (2 * 1024 * 1024) //2M
 
 /* order range: [SLAB_MIN_ORDER, SLAB_MAX_ORDER] */
 #define SLAB_MIN_ORDER (5)
@@ -36,4 +36,3 @@ void init_slab(void);
 
 void *alloc_in_slab(u64);
 void free_in_slab(void *addr);
-

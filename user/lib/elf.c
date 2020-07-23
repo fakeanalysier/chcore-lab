@@ -9,10 +9,8 @@
 
 static bool is_elf_magic(struct elf_indent *indent)
 {
-	return (indent->ei_magic[0] == 0x7F &&
-		indent->ei_magic[1] == 'E' &&
-		indent->ei_magic[2] == 'L' &&
-		indent->ei_magic[3] == 'F');
+	return (indent->ei_magic[0] == 0x7F && indent->ei_magic[1] == 'E' &&
+		indent->ei_magic[2] == 'L' && indent->ei_magic[3] == 'F');
 }
 
 #define ELF_ENDIAN_LE(indent) ((indent).ei_data == 1)
@@ -55,10 +53,10 @@ static int parse_elf_header(const char *code, struct elf_header *header)
 			header->e_flags = le32_to_cpu(header_32->e_flags);
 			header->e_ehsize = le16_to_cpu(header_32->e_ehsize);
 			header->e_phentsize =
-					le16_to_cpu(header_32->e_phentsize);
+				le16_to_cpu(header_32->e_phentsize);
 			header->e_phnum = le16_to_cpu(header_32->e_phnum);
 			header->e_shentsize =
-					le16_to_cpu(header_32->e_shentsize);
+				le16_to_cpu(header_32->e_shentsize);
 			header->e_shnum = le16_to_cpu(header_32->e_shnum);
 			header->e_shstrndx = le16_to_cpu(header_32->e_shstrndx);
 		} else if (ELF_BITS_64(header->e_indent)) {
@@ -68,10 +66,10 @@ static int parse_elf_header(const char *code, struct elf_header *header)
 			header->e_flags = le32_to_cpu(header_64->e_flags);
 			header->e_ehsize = le16_to_cpu(header_64->e_ehsize);
 			header->e_phentsize =
-					le16_to_cpu(header_64->e_phentsize);
+				le16_to_cpu(header_64->e_phentsize);
 			header->e_phnum = le16_to_cpu(header_64->e_phnum);
 			header->e_shentsize =
-					le16_to_cpu(header_64->e_shentsize);
+				le16_to_cpu(header_64->e_shentsize);
 			header->e_shnum = le16_to_cpu(header_64->e_shnum);
 			header->e_shstrndx = le16_to_cpu(header_64->e_shstrndx);
 		} else {
@@ -91,10 +89,10 @@ static int parse_elf_header(const char *code, struct elf_header *header)
 			header->e_flags = be32_to_cpu(header_32->e_flags);
 			header->e_ehsize = be16_to_cpu(header_32->e_ehsize);
 			header->e_phentsize =
-					be16_to_cpu(header_32->e_phentsize);
+				be16_to_cpu(header_32->e_phentsize);
 			header->e_phnum = be16_to_cpu(header_32->e_phnum);
 			header->e_shentsize =
-					be16_to_cpu(header_32->e_shentsize);
+				be16_to_cpu(header_32->e_shentsize);
 			header->e_shnum = be16_to_cpu(header_32->e_shnum);
 			header->e_shstrndx = be16_to_cpu(header_32->e_shstrndx);
 		} else if (ELF_BITS_64(header->e_indent)) {
@@ -104,10 +102,10 @@ static int parse_elf_header(const char *code, struct elf_header *header)
 			header->e_flags = be32_to_cpu(header_64->e_flags);
 			header->e_ehsize = be16_to_cpu(header_64->e_ehsize);
 			header->e_phentsize =
-					be16_to_cpu(header_64->e_phentsize);
+				be16_to_cpu(header_64->e_phentsize);
 			header->e_phnum = be16_to_cpu(header_64->e_phnum);
 			header->e_shentsize =
-					be16_to_cpu(header_64->e_shentsize);
+				be16_to_cpu(header_64->e_shentsize);
 			header->e_shnum = be16_to_cpu(header_64->e_shnum);
 			header->e_shstrndx = be16_to_cpu(header_64->e_shstrndx);
 		} else {
@@ -213,7 +211,7 @@ static int parse_elf_section_header(const char *code,
 			header->sh_link = le32_to_cpu(header_32->sh_link);
 			header->sh_info = le32_to_cpu(header_32->sh_info);
 			header->sh_addralign =
-					le32_to_cpu(header_32->sh_addralign);
+				le32_to_cpu(header_32->sh_addralign);
 			header->sh_entsize = le32_to_cpu(header_32->sh_entsize);
 		} else if (ELF_BITS_64(elf->e_indent)) {
 			header_64 = (struct elf_section_header *)code;
@@ -226,7 +224,7 @@ static int parse_elf_section_header(const char *code,
 			header->sh_link = le32_to_cpu(header_64->sh_link);
 			header->sh_info = le32_to_cpu(header_64->sh_info);
 			header->sh_addralign =
-					le64_to_cpu(header_64->sh_addralign);
+				le64_to_cpu(header_64->sh_addralign);
 			header->sh_entsize = le64_to_cpu(header_64->sh_entsize);
 		} else {
 			return -EINVAL;
@@ -243,7 +241,7 @@ static int parse_elf_section_header(const char *code,
 			header->sh_link = be32_to_cpu(header_32->sh_link);
 			header->sh_info = be32_to_cpu(header_32->sh_info);
 			header->sh_addralign =
-					be32_to_cpu(header_32->sh_addralign);
+				be32_to_cpu(header_32->sh_addralign);
 			header->sh_entsize = be32_to_cpu(header_32->sh_entsize);
 		} else if (ELF_BITS_64(elf->e_indent)) {
 			header_64 = (struct elf_section_header *)code;
@@ -256,7 +254,7 @@ static int parse_elf_section_header(const char *code,
 			header->sh_link = be32_to_cpu(header_64->sh_link);
 			header->sh_info = be32_to_cpu(header_64->sh_info);
 			header->sh_addralign =
-					be64_to_cpu(header_64->sh_addralign);
+				be64_to_cpu(header_64->sh_addralign);
 			header->sh_entsize = be64_to_cpu(header_64->sh_entsize);
 		} else {
 			return -EINVAL;
@@ -266,7 +264,6 @@ static int parse_elf_section_header(const char *code,
 	}
 	return 0;
 }
-
 
 struct elf_file *elf_parse_file(const char *code, struct elf_file *elf)
 {
@@ -285,18 +282,18 @@ struct elf_file *elf_parse_file(const char *code, struct elf_file *elf)
 
 	/* Parse program headers and section headers */
 	for (i = 0; i < elf->header.e_phnum; ++i) {
-		err = parse_elf_program_header(code + elf->header.e_phoff +
-					       elf->header.e_phentsize * i,
-					       &elf->header,
-					       &elf->p_headers[i]);
+		err = parse_elf_program_header(
+			code + elf->header.e_phoff +
+				elf->header.e_phentsize * i,
+			&elf->header, &elf->p_headers[i]);
 		if (err)
 			goto out;
 	}
 	for (i = 0; i < elf->header.e_shnum; ++i) {
-		err = parse_elf_section_header(code + elf->header.e_shoff +
-					       elf->header.e_shentsize * i,
-					       &elf->header,
-					       &elf->s_headers[i]);
+		err = parse_elf_section_header(
+			code + elf->header.e_shoff +
+				elf->header.e_shentsize * i,
+			&elf->header, &elf->s_headers[i]);
 		if (err)
 			goto out;
 	}

@@ -23,7 +23,6 @@
 #include <sched/context.h>
 #include <sched/sched.h>
 
-
 /**
  * A helper function to transfer all the ipc_msg's capbilities of client's
  * process to server's process
@@ -93,7 +92,6 @@ out:
 	return r;
 }
 
-
 /**
  * Lab 4
  * Helper function
@@ -146,7 +144,6 @@ static u64 thread_migrate_to_server(struct ipc_connection *conn, u64 arg)
 	BUG_ON(1);
 	return 0;
 }
-
 
 /**
  * Lab 4

@@ -52,7 +52,7 @@ static int register_server(struct thread *server, u64 callback, u64 max_client,
 	}
 	server_ipc_config->max_client = max_client;
 	server_ipc_config->conn_bmp =
-	    kzalloc(BITS_TO_LONGS(max_client) * sizeof(long));
+		kzalloc(BITS_TO_LONGS(max_client) * sizeof(long));
 	if (!server_ipc_config->conn_bmp) {
 		r = -ENOMEM;
 		goto out_free_server_ipc_config;
@@ -85,7 +85,6 @@ out_free_server_ipc_config:
 out_fail:
 	return r;
 }
-
 
 u64 sys_register_server(u64 callback, u64 max_client, u64 vm_config_ptr)
 {

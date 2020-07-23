@@ -23,9 +23,10 @@
 u64 cntv_tval;
 
 /* Per core IRQ SOURCE MMIO address */
-u64 core_timer_irqcntl[PLAT_CPU_NUM] = {
-    CORE0_TIMER_IRQCNTL, CORE1_TIMER_IRQCNTL, CORE2_TIMER_IRQCNTL,
-    CORE3_TIMER_IRQCNTL};
+u64 core_timer_irqcntl[PLAT_CPU_NUM] = { CORE0_TIMER_IRQCNTL,
+					 CORE1_TIMER_IRQCNTL,
+					 CORE2_TIMER_IRQCNTL,
+					 CORE3_TIMER_IRQCNTL };
 
 void timer_init(void)
 {

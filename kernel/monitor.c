@@ -16,18 +16,16 @@
 #include <common/printk.h>
 #include <common/types.h>
 
-static inline __attribute__((always_inline)) u64 
-read_fp() {
-  u64 fp;
-  __asm __volatile("mov %0, x29" : "=r" (fp));
-  return fp;
+static inline __attribute__((always_inline)) u64 read_fp()
+{
+	u64 fp;
+	__asm __volatile("mov %0, x29" : "=r"(fp));
+	return fp;
 }
 
-__attribute__((optimize("O1")))
-int
-mon_backtrace()
+__attribute__((optimize("O1"))) int mon_backtrace()
 {
-  printk("Stack backtrace:\n");
+	printk("Stack backtrace:\n");
 
 	// Your code here.
 

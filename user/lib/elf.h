@@ -10,22 +10,22 @@
 
 #define EI_MAG_SIZE 4
 
-#define PT_NULL		0x00000000
-#define PT_LOAD		0x00000001
-#define PT_DYNAMIC	0x00000002
-#define PT_INTERP	0x00000003
-#define PT_NOTE		0x00000004
-#define PT_SHLIB	0x00000005
-#define PT_PHDR		0x00000006
-#define PT_LOOS		0x60000000
-#define PT_HIOS		0x6fffffff
-#define PT_LOPROC	0x70000000
-#define PT_HIRPOC	0x7fffffff
+#define PT_NULL    0x00000000
+#define PT_LOAD    0x00000001
+#define PT_DYNAMIC 0x00000002
+#define PT_INTERP  0x00000003
+#define PT_NOTE    0x00000004
+#define PT_SHLIB   0x00000005
+#define PT_PHDR    0x00000006
+#define PT_LOOS    0x60000000
+#define PT_HIOS    0x6fffffff
+#define PT_LOPROC  0x70000000
+#define PT_HIRPOC  0x7fffffff
 
-#define PF_ALL	0x7
-#define PF_X	0x1
-#define PF_W	0x2
-#define PF_R	0x4
+#define PF_ALL 0x7
+#define PF_X   0x1
+#define PF_W   0x2
+#define PF_R   0x4
 
 /*
  * This part of ELF header is endianness-independent.

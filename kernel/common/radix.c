@@ -19,7 +19,7 @@
 #include <lib/errno.h>
 
 /* ceil(a/b) */
-#define DIV_UP(a, b) (((a)+(b)-1)/(b))
+#define DIV_UP(a, b) (((a) + (b)-1) / (b))
 
 #define RADIX_LEVELS (DIV_UP(RADIX_MAX_BITS, RADIX_NODE_BITS))
 
@@ -144,15 +144,13 @@ static void radix_free_node(struct radix_node *node, int node_level,
 	WARN_ON(!node, "should not try to free a node pointed by NULL");
 	if (node_level == RADIX_LEVELS - 1) {
 		if (value_deleter) {
-			for (i = 0; i < RADIX_NODE_SIZE; i++)
-			{
+			for (i = 0; i < RADIX_NODE_SIZE; i++) {
 				if (node->values[i])
 					value_deleter(node->values[i]);
 			}
 		}
 	} else {
-		for (i = 0; i < RADIX_NODE_SIZE; i++)
-		{
+		for (i = 0; i < RADIX_NODE_SIZE; i++) {
 			if (node->children[i])
 				radix_free_node(node->children[i],
 						node_level + 1, value_deleter);

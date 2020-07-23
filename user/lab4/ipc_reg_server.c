@@ -4,7 +4,6 @@
 #include <lib/syscall.h>
 #include <lib/type.h>
 
-
 void ipc_dispatcher(ipc_msg_t *ipc_msg)
 {
 	ipc_return((u64)ipc_msg);

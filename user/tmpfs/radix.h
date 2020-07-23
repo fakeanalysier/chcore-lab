@@ -8,10 +8,10 @@
 #define RADIX_NODE_BITS (9)
 #define RADIX_NODE_SIZE (1 << (RADIX_NODE_BITS))
 #define RADIX_NODE_MASK (RADIX_NODE_SIZE - 1)
-#define RADIX_MAX_BITS (64)
+#define RADIX_MAX_BITS  (64)
 
 /* ceil(a/b) */
-#define DIV_UP(a, b) (((a)+(b)-1)/(b))
+#define DIV_UP(a, b) (((a) + (b)-1) / (b))
 
 #define RADIX_LEVELS (DIV_UP(RADIX_MAX_BITS, RADIX_NODE_BITS))
 
@@ -35,7 +35,8 @@ static void init_radix(struct radix *radix)
 	radix->value_deleter = NULL;
 }
 
-static void init_radix_w_deleter(struct radix *radix, void (*value_deleter)(void *))
+static void init_radix_w_deleter(struct radix *radix,
+				 void (*value_deleter)(void *))
 {
 	init_radix(radix);
 	radix->value_deleter = value_deleter;
@@ -125,13 +126,13 @@ static void *radix_get(struct radix *radix, u64 key)
 }
 
 /* FIXME(MK): We should allow users to store NULL in radix... */
-__attribute__((__unused__))
-static int radix_del(struct radix *radix, u64 key)
+__attribute__((__unused__)) static int radix_del(struct radix *radix, u64 key)
 {
 	return radix_add(radix, key, NULL);
 }
 
-static void radix_free_node(struct radix_node *node, int node_level, void (*value_deleter)(void *))
+static void radix_free_node(struct radix_node *node, int node_level,
+			    void (*value_deleter)(void *))
 {
 	int i;
 
@@ -139,20 +140,18 @@ static void radix_free_node(struct radix_node *node, int node_level, void (*valu
 
 	if (node_level == RADIX_LEVELS - 1) {
 		if (value_deleter) {
-			for (i = 0; i < RADIX_NODE_SIZE; i++)
-			{
+			for (i = 0; i < RADIX_NODE_SIZE; i++) {
 				if (node->values[i])
 					value_deleter(node->values[i]);
 			}
 		}
 	} else {
-		for (i = 0; i < RADIX_NODE_SIZE; i++)
-		{
+		for (i = 0; i < RADIX_NODE_SIZE; i++) {
 			if (node->children[i])
-				radix_free_node(node->children[i], node_level + 1, value_deleter);
+				radix_free_node(node->children[i],
+						node_level + 1, value_deleter);
 		}
 	}
-
 }
 
 static int radix_free(struct radix *radix)

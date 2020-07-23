@@ -20,7 +20,7 @@ struct lock {
 
 	volatile u32 next;
 	char pad1[pad_to_cache_line(sizeof(u32))];
-}__attribute__((aligned(CACHELINE_SZ)));
+} __attribute__((aligned(CACHELINE_SZ)));
 
 int lock_init(struct lock *lock);
 void lock(struct lock *lock);

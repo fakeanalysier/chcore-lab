@@ -17,13 +17,10 @@
 #include <common/kprint.h>
 #endif
 
-
 static bool is_elf_magic(struct elf_indent *indent)
 {
-	return (indent->ei_magic[0] == 0x7F &&
-		indent->ei_magic[1] == 'E' &&
-		indent->ei_magic[2] == 'L' &&
-		indent->ei_magic[3] == 'F');
+	return (indent->ei_magic[0] == 0x7F && indent->ei_magic[1] == 'E' &&
+		indent->ei_magic[2] == 'L' && indent->ei_magic[3] == 'F');
 }
 
 #define ELF_ENDIAN_LE(indent) ((indent).ei_data == 1)
@@ -321,18 +318,18 @@ struct elf_file *elf_parse_file(const char *code)
 
 	/* Parse program headers and section headers */
 	for (i = 0; i < elf->header.e_phnum; ++i) {
-		err = parse_elf_program_header(code + elf->header.e_phoff +
-					       elf->header.e_phentsize * i,
-					       &elf->header,
-					       &elf->p_headers[i]);
+		err = parse_elf_program_header(
+			code + elf->header.e_phoff +
+				elf->header.e_phentsize * i,
+			&elf->header, &elf->p_headers[i]);
 		if (err)
 			goto out_free_all;
 	}
 	for (i = 0; i < elf->header.e_shnum; ++i) {
-		err = parse_elf_section_header(code + elf->header.e_shoff +
-					       elf->header.e_shentsize * i,
-					       &elf->header,
-					       &elf->s_headers[i]);
+		err = parse_elf_section_header(
+			code + elf->header.e_shoff +
+				elf->header.e_shentsize * i,
+			&elf->header, &elf->s_headers[i]);
 		if (err)
 			goto out_free_all;
 	}
@@ -375,8 +372,7 @@ static void kprint_elf_sheader(const char *prefix,
 	kinfo("%s.sh_entsize   = 0x%llx\n", prefix, sheader->sh_entsize);
 }
 
-__attribute__((unused))
-static void kprint_elf(struct elf_file *elf)
+__attribute__((unused)) static void kprint_elf(struct elf_file *elf)
 {
 	int i;
 
@@ -394,12 +390,9 @@ static void kprint_elf(struct elf_file *elf)
 	kinfo("   .ei_osabi      = 0x%x\n", elf->header.e_indent.ei_osabi);
 	kinfo("   .ei_abiversion = 0x%x\n", elf->header.e_indent.ei_abiversion);
 	kinfo("   .ei_pad        = 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",
-	      elf->header.e_indent.ei_pad[0],
-	      elf->header.e_indent.ei_pad[1],
-	      elf->header.e_indent.ei_pad[2],
-	      elf->header.e_indent.ei_pad[3],
-	      elf->header.e_indent.ei_pad[4],
-	      elf->header.e_indent.ei_pad[5],
+	      elf->header.e_indent.ei_pad[0], elf->header.e_indent.ei_pad[1],
+	      elf->header.e_indent.ei_pad[2], elf->header.e_indent.ei_pad[3],
+	      elf->header.e_indent.ei_pad[4], elf->header.e_indent.ei_pad[5],
 	      elf->header.e_indent.ei_pad[6]);
 
 	kinfo("  .e_type      = 0x%x\n", elf->header.e_type);
@@ -426,4 +419,3 @@ static void kprint_elf(struct elf_file *elf)
 		kprint_elf_sheader("  ", &elf->s_headers[i]);
 	}
 }
-

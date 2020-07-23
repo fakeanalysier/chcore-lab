@@ -9,9 +9,8 @@
 
 #define PREFIX "[tmpfs]"
 
-#define info(fmt, ...) printf(PREFIX " " fmt, ## __VA_ARGS__)
-#define error(fmt, ...) printf(PREFIX " " fmt, ## __VA_ARGS__)
-
+#define info(fmt, ...)  printf(PREFIX " " fmt, ##__VA_ARGS__)
+#define error(fmt, ...) printf(PREFIX " " fmt, ##__VA_ARGS__)
 
 #define MAX_FILENAME_LEN (255)
 
@@ -24,9 +23,8 @@ struct string {
 	u64 hash;
 };
 
-
 // dentry is linked by `hlist_node`
-// we can get the address of this structure by address of `node` using 
+// we can get the address of this structure by address of `node` using
 // `container_of_safe`
 struct dentry {
 	struct string name;
@@ -36,7 +34,7 @@ struct dentry {
 
 struct inode {
 	u64 type;
-  size_t size;
+	size_t size;
 	union {
 		struct htable dentries;
 		struct radix data;

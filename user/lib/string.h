@@ -18,4 +18,3 @@ size_t strlen(const char *s);
 char *strstr(const char *haystack, const char *needle);
 
 char *strcat(char *dest, const char *src);
-

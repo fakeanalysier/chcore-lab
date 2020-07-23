@@ -30,8 +30,12 @@ void free_page(void *page)
 
 #include "../../../kernel/mm/page_table.c"
 
-void set_ttbr0_el1(paddr_t p) { }
-void flush_tlb() { }
+void set_ttbr0_el1(paddr_t p)
+{
+}
+void flush_tlb()
+{
+}
 
 void printk(const char *fmt, ...)
 {
@@ -42,11 +46,11 @@ void printk(const char *fmt, ...)
 }
 
 #define RND_MAPPING_PAGES (10000)
-#define RND_VA_MAX (0x10000000)
-#define RND_PA_MAX (0x10000000)
-#define RND_SEED (1024)
-#define DEFAULT_FLAGS (3)
-#define ALTER_FLAGS (4)
+#define RND_VA_MAX        (0x10000000)
+#define RND_PA_MAX        (0x10000000)
+#define RND_SEED          (1024)
+#define DEFAULT_FLAGS     (3)
+#define ALTER_FLAGS       (4)
 
 static inline u64 rand_addr(u64 max)
 {
@@ -62,8 +66,8 @@ static inline u64 rand_page_addr(u64 max)
 	return ret;
 }
 
-void test_page_mappings(vaddr_t *pgtbl, paddr_t *pas,
-			vaddr_t *vas, int nr_pages)
+void test_page_mappings(vaddr_t *pgtbl, paddr_t *pas, vaddr_t *vas,
+			int nr_pages)
 {
 	paddr_t pa;
 	vaddr_t va;
@@ -148,7 +152,7 @@ MU_TEST(test_map_unmap_page)
 	pas = malloc(sizeof(*pas) * RND_MAPPING_PAGES);
 	/* Generate and map all pages */
 	for (i = 0; i < RND_MAPPING_PAGES; i++) {
-rerand:
+	rerand:
 		vas[i] = rand_page_addr(RND_VA_MAX);
 		pas[i] = rand_page_addr(RND_PA_MAX);
 		for (j = 0; j < i; j++) {
@@ -199,7 +203,7 @@ MU_TEST_SUITE(test_suite)
 
 int main(int argc, char *argv[])
 {
-        MU_RUN_SUITE(test_suite);
-        MU_REPORT();
-        return minunit_status;
+	MU_RUN_SUITE(test_suite);
+	MU_REPORT();
+	return minunit_status;
 }

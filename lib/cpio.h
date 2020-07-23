@@ -50,16 +50,18 @@ struct cpio_header {
 	u64 c_check;
 };
 
-#define cpio_fatal(fmt, ...) do { \
-	fprintf(stderr, "CPIO tool fatal error: " fmt, ##__VA_ARGS__); \
-	exit(-1); \
-} while (0)
+#define cpio_fatal(fmt, ...)                                                   \
+	do {                                                                   \
+		fprintf(stderr, "CPIO tool fatal error: " fmt, ##__VA_ARGS__); \
+		exit(-1);                                                      \
+	} while (0)
 
-#define cpio_fatal_e(fmt, ...) do { \
-	fprintf(stderr, "CPIO tool fatal error (%s): " fmt, \
-		strerror(errno), ##__VA_ARGS__); \
-	exit(-1); \
-} while (0)
+#define cpio_fatal_e(fmt, ...)                                      \
+	do {                                                        \
+		fprintf(stderr, "CPIO tool fatal error (%s): " fmt, \
+			strerror(errno), ##__VA_ARGS__);            \
+		exit(-1);                                           \
+	} while (0)
 
 #define ALIGN4_UP(x) ((((u64)x) & (~3llu)) + ((!!(((u64)x) & 3)) << 2))
 

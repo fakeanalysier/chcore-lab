@@ -4,14 +4,13 @@
 #include <launcher.h>
 #include <syscall.h>
 
-
 // get a character from standard input
 char getch()
 {
 	char c;
-  // TODO(Lab5): your code here
+	// TODO(Lab5): your code here
 
-  return c;
+	return c;
 }
 
 int main(int argc, char *argv[])

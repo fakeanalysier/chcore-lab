@@ -31,7 +31,7 @@ void tst_mutex(bool is_bsp)
 	global_barrier(is_bsp);
 	BUG_ON(mutex_test_count != PLAT_CPU_NUM * LOCK_TEST_NUM);
 	global_barrier(is_bsp);
-	if(is_bsp) {
+	if (is_bsp) {
 		printk("pass tst_mutex\n");
 	}
 }
@@ -65,7 +65,7 @@ void tst_big_lock(bool is_bsp)
 	global_barrier(is_bsp);
 	BUG_ON(LOCK_TEST_NUM * PLAT_CPU_NUM != big_lock_test_count);
 	global_barrier(is_bsp);
-	if(is_bsp) {
+	if (is_bsp) {
 		lock_kernel();
 		printk("pass tst_big_lock\n");
 	}

@@ -24,14 +24,9 @@
 #include <common/smp.h>
 #include <common/tools.h>
 
-
 /* Per core IRQ SOURCE MMIO address */
-u64 core_irq_source[PLAT_CPU_NUM] = {
-	CORE0_IRQ_SOURCE,
-	CORE1_IRQ_SOURCE,
-	CORE2_IRQ_SOURCE,
-	CORE3_IRQ_SOURCE
-};
+u64 core_irq_source[PLAT_CPU_NUM] = { CORE0_IRQ_SOURCE, CORE1_IRQ_SOURCE,
+				      CORE2_IRQ_SOURCE, CORE3_IRQ_SOURCE };
 
 void handle_irq(int type)
 {
@@ -48,7 +43,6 @@ void handle_irq(int type)
 	 * Lab 4
 	 * Do you miss something?
 	 */
-
 }
 
 void plat_handle_irq(void)

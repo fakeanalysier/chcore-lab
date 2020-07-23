@@ -20,4 +20,3 @@ void global_barrier_init(void);
 void global_barrier(bool);
 void global_barrier_primary(void);
 void global_barrier_secondary(void);
-

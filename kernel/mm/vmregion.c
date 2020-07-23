@@ -32,14 +32,14 @@ static struct vmregion *alloc_vmregion(void)
 
 static void free_vmregion(struct vmregion *vmr)
 {
-	kfree((void*)vmr);
+	kfree((void *)vmr);
 }
 
 /*
  * Returns 0 when no intersection detected.
  */
 static int check_vmr_intersect(struct vmspace *vmspace,
-				struct vmregion  *vmr_to_add)
+			       struct vmregion *vmr_to_add)
 {
 	struct vmregion *vmr;
 	vaddr_t new_start, start;
@@ -48,9 +48,10 @@ static int check_vmr_intersect(struct vmspace *vmspace,
 	new_start = vmr_to_add->start;
 	new_end = new_start + vmr_to_add->size - 1;
 
-	for_each_in_list(vmr, struct vmregion, node, &(vmspace->vmr_list)) {
+	for_each_in_list(vmr, struct vmregion, node, &(vmspace->vmr_list))
+	{
 		start = vmr->start;
-		end   = start + vmr->size;
+		end = start + vmr->size;
 		if ((new_start >= start && new_start < end) ||
 		    (new_end >= start && new_end < end))
 			return 1;
@@ -62,7 +63,8 @@ static int is_vmr_in_vmspace(struct vmspace *vmspace, struct vmregion *vmr)
 {
 	struct vmregion *iter;
 
-	for_each_in_list(iter, struct vmregion, node, &(vmspace->vmr_list)) {
+	for_each_in_list(iter, struct vmregion, node, &(vmspace->vmr_list))
+	{
 		if (iter == vmr)
 			return 1;
 	}
@@ -81,7 +83,7 @@ static int add_vmr_to_vmspace(struct vmspace *vmspace, struct vmregion *vmr)
 
 static void del_vmr_from_vmspace(struct vmspace *vmspace, struct vmregion *vmr)
 {
-	if(is_vmr_in_vmspace(vmspace, vmr))
+	if (is_vmr_in_vmspace(vmspace, vmr))
 		list_del(&(vmr->node));
 	free_vmregion(vmr);
 }
@@ -91,10 +93,11 @@ struct vmregion *find_vmr_for_va(struct vmspace *vmspace, vaddr_t addr)
 	struct vmregion *vmr;
 	vaddr_t start, end;
 
-	for_each_in_list(vmr, struct vmregion, node, &(vmspace->vmr_list)) {
+	for_each_in_list(vmr, struct vmregion, node, &(vmspace->vmr_list))
+	{
 		start = vmr->start;
-		end   = start + vmr->size;
-		if(addr >= start && addr < end)
+		end = start + vmr->size;
+		if (addr >= start && addr < end)
 			return vmr;
 	}
 	return NULL;
@@ -140,10 +143,8 @@ int vmspace_map_range(struct vmspace *vmspace, vaddr_t va, size_t len,
 
 	if (ret < 0)
 		goto out_free_vmr;
-	BUG_ON((pmo->type != PMO_DATA)   &&
-	       (pmo->type != PMO_ANONYM) &&
-	       (pmo->type != PMO_DEVICE) &&
-	       (pmo->type != PMO_SHM));
+	BUG_ON((pmo->type != PMO_DATA) && (pmo->type != PMO_ANONYM) &&
+	       (pmo->type != PMO_DEVICE) && (pmo->type != PMO_SHM));
 	/* on-demand mapping for anonymous mapping */
 	if (pmo->type == PMO_DATA)
 		fill_page_table(vmspace, vmr);
@@ -193,7 +194,7 @@ int vmspace_unmap_range(struct vmspace *vmspace, vaddr_t va, size_t len)
 	if (!vmr)
 		return -1;
 	start = vmr->start;
-	size  = vmr->size;
+	size = vmr->size;
 
 	if ((va != start) && (len != size)) {
 		printk("we only support unmap a whole vmregion now.\n");
@@ -215,7 +216,7 @@ int vmspace_init(struct vmspace *vmspace)
 	/* alloc the root page table page */
 	vmspace->pgtbl = get_pages(0);
 	BUG_ON(vmspace->pgtbl == NULL);
-	memset((void*)vmspace->pgtbl, 0, PAGE_SIZE);
+	memset((void *)vmspace->pgtbl, 0, PAGE_SIZE);
 
 	/* architecture dependent initilization */
 	vmspace->user_current_heap = HEAP_START;
@@ -231,9 +232,10 @@ int destroy_vmspace(struct vmspace *vmspace)
 	vaddr_t start;
 	size_t size;
 
-	for_each_in_list(vmr, struct vmregion, node, &(vmspace->vmr_list)) {
+	for_each_in_list(vmr, struct vmregion, node, &(vmspace->vmr_list))
+	{
 		start = vmr->start;
-		size  = vmr->size;
+		size = vmr->size;
 		del_vmr_from_vmspace(vmspace, vmr);
 		unmap_range_in_pgtbl(vmspace->pgtbl, start, size);
 	}
@@ -248,7 +250,7 @@ int destroy_vmspace(struct vmspace *vmspace)
 /* init an allocated pmobject */
 void pmo_init(struct pmobject *pmo, pmo_type_t type, size_t len, paddr_t paddr)
 {
-	memset((void*)pmo, 0, sizeof(*pmo));
+	memset((void *)pmo, 0, sizeof(*pmo));
 
 	len = ROUND_UP(len, PAGE_SIZE);
 	pmo->size = len;
@@ -260,8 +262,7 @@ void pmo_init(struct pmobject *pmo, pmo_type_t type, size_t len, paddr_t paddr)
 		pmo->start = (paddr_t)virt_to_phys(kmalloc(len));
 	} else if (type == PMO_DEVICE) {
 		pmo->start = paddr;
-	}
-	else {
+	} else {
 		/*
 		 * for stack, heap, we do not allocate the physical memory at
 		 * once

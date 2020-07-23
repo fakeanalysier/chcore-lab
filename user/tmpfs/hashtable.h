@@ -10,7 +10,6 @@ struct htable {
 	int size;
 };
 
-
 static inline void init_htable(struct htable *ht, int size)
 {
 	ht->size = size;
@@ -58,11 +57,10 @@ static inline int htable_free(struct htable *ht)
 	return 0;
 }
 
-
-#define for_each_in_htable(elem, b, field, ht) \
+#define for_each_in_htable(elem, b, field, ht)                        \
 	for (b = 0, elem = NULL; elem == NULL && b < (ht)->size; ++b) \
-		for_each_in_hlist(elem, field, &(ht)->buckets[b])
+	for_each_in_hlist(elem, field, &(ht)->buckets[b])
 
-#define for_each_in_htable_safe(elem, tmp, b, field, ht) \
+#define for_each_in_htable_safe(elem, tmp, b, field, ht)              \
 	for (b = 0, elem = NULL; elem == NULL && b < (ht)->size; ++b) \
-		for_each_in_hlist_safe(elem, tmp, field, &(ht)->buckets[b])
+	for_each_in_hlist_safe(elem, tmp, field, &(ht)->buckets[b])
