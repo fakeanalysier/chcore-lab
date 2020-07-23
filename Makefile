@@ -14,6 +14,9 @@ all: user build
 gdb:
 	gdb-multiarch -n -x .gdbinit
 
+gdb-tui:
+	gdb-multiarch -n -x .gdbinit -tui
+
 build: FORCE
 	./scripts/docker_build.sh $(bin)
 
@@ -57,6 +60,9 @@ ifeq ($(LAB), 2)
 	./scripts/run_mm_test.sh
 endif
 	./scripts/grade-lab$(LAB)
+
+format:
+	$(V)find . -iname '*.h' -o -iname '*.c' | xargs clang-format -i -style=file
 
 .PHONY: clean
 clean:
