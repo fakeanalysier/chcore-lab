@@ -284,6 +284,15 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		 * Transfer the capbilities (nr_caps) of current process to the
 		 * capbilities of child process
 		 */
+		if (nr_caps > 0) {
+			ret = usys_transfer_caps(new_process_cap, caps, nr_caps,
+						 transfer_caps);
+			if (ret != 0) {
+				printf("%s: fail to transfer_caps (ret: %d)\n",
+				       __func__, ret);
+				goto fail;
+			}
+		}
 	}
 
 	{
@@ -292,6 +301,15 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 		 * Use the given pmo_mao_reqs to map the vmspace in the child
 		 * process
 		 */
+		if (nr_pmo_map_reqs > 0) {
+			ret = usys_map_pmos(new_process_cap, pmo_map_reqs,
+					    nr_pmo_map_reqs);
+			if (ret != 0) {
+				printf("%s: fail to map_pmos (ret: %d)\n",
+				       __func__, ret);
+				goto fail;
+			}
+		}
 	}
 
 	{
@@ -377,6 +395,10 @@ int launch_process_with_pmos_caps(struct user_elf *user_elf,
 
 	{
 		/* Step C: Output the child process & thread capabilities */
+		if (child_process_cap)
+			*child_process_cap = new_process_cap;
+		if (child_main_thread_cap)
+			*child_main_thread_cap = main_stack_cap;
 	}
 
 	return 0;
