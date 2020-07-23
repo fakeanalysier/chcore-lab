@@ -181,10 +181,6 @@ u64 sys_ipc_call(u32 conn_cap, ipc_msg_t *ipc_msg)
 	 * The arg is actually the 64-bit arg for ipc_dispatcher
 	 * Then what value should the arg be?
 	 * */
-	printk("conn->target->server_ipc_config->vm_config.buf_base_addr: %lx\n",
-	       conn->target->server_ipc_config->vm_config.buf_base_addr);
-	printk("conn->buf.server_user_addr: %lx\n", conn->buf.server_user_addr);
-	printk("conn->buf.client_user_addr: %lx\n", conn->buf.client_user_addr);
 	arg = conn->buf.server_user_addr;
 	thread_migrate_to_server(conn, arg);
 
@@ -201,5 +197,10 @@ out_fail:
  * */
 u64 sys_ipc_reg_call(u32 conn_cap, u64 arg0)
 {
-	return (u64)-1;
+	struct ipc_connection *conn =
+		obj_get(current_thread->process, conn_cap, TYPE_CONNECTION);
+	if (!conn)
+		return -ECAPBILITY;
+	thread_migrate_to_server(conn, arg0);
+	BUG("This function should never\n");
 }
