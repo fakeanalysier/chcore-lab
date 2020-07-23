@@ -162,6 +162,9 @@ static int create_connection(struct thread *source, struct thread *target,
 	}
 	conn->server_conn_cap = server_conn_cap;
 
+	// Set callback address
+	conn->callback = server_ipc_config->callback;
+
 	return conn_cap;
 out_free_stack_pmo:
 	kfree(stack_pmo);
