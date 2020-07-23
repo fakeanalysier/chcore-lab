@@ -131,7 +131,7 @@ static int create_connection(struct thread *source, struct thread *target,
 	buf_size = MIN(vm_config->buf_size, client_vm_config->buf_size);
 	client_vm_config->buf_size = buf_size;
 	kdebug("server buf base:%lx size:%lx, client base:%lx\n",
-	       server_stack_base, stack_size, client_buf_base);
+	       server_buf_base, buf_size, client_buf_base);
 
 	buf_pmo = kmalloc(sizeof(struct pmobject));
 	if (!buf_pmo) {
