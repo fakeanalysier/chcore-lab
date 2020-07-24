@@ -67,7 +67,7 @@ primary:
 
 	/* Prepare stack pointer and jump to C. */
 	adr 	x0, boot_cpu_stack
-	add 	x0, x0, #0x1000
+	add 	x0, x0, #0x1000 // x0 = &boot_cpu_stack[1][0]
 	mov 	sp, x0
 
 	bl 	init_c

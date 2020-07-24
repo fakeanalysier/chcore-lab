@@ -34,7 +34,7 @@ void enable_smp_cores(void *addr)
 		 * _start of `start.S`. Then, what's the flag?
 		 * You only need to write one line of code.
 		 */
-
+		secondary_boot_flag[i] = 1;
 		flush_dcache_area((u64)secondary_boot_flag,
 				  (u64)sizeof(u64) * PLAT_CPU_NUM);
 		asm volatile("dsb sy");
@@ -43,6 +43,8 @@ void enable_smp_cores(void *addr)
 		 * The BSP waits for the currently initializing AP finishing
 		 * before activating the next one
 		 */
+		while (cpu_status[i] == cpu_hang)
+			;
 	}
 
 	/* This information is printed when all CPUs finish their initialization */

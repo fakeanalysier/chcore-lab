@@ -31,7 +31,7 @@ char kernel_stack[PLAT_CPU_NUM][KERNEL_STACK_SIZE];
 int mon_backtrace();
 
 // Test the stack backtrace function (lab 1 only)
-void test_backtrace(long x)
+__attribute__((optimize("O1"))) void test_backtrace(long x)
 {
 	kinfo("entering test_backtrace %d\n", x);
 	if (x > 0)
@@ -63,6 +63,7 @@ void main(void *addr)
 	 *  Initialize and then acquire the big kernel lock.
 	 */
 	kernel_lock_init();
+	lock_kernel();
 	kinfo("[ChCore] lock init finished\n");
 
 	/* Init scheduler with specified policy. */
@@ -111,6 +112,7 @@ void secondary_start(void)
 	 * Inform the BSP at last to start cpu one by one
 	 * Hints: use cpu_status
 	*/
+	cpu_status[smp_get_cpu_id()] = cpu_run;
 
 #ifndef TEST
 	run_test(false);
@@ -120,6 +122,7 @@ void secondary_start(void)
 	 *  Lab 4
 	 *  Acquire the big kernel lock
 	 */
+	lock_kernel();
 
 	/* Where the AP first returns to the user mode */
 	sched();

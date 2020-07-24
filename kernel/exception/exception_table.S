@@ -91,6 +91,7 @@
  * 	unlock the big kernel lock before returning to the user mode
  */
 .macro	exception_return
+	bl	unlock_kernel
 	exception_exit
 .endm
 
@@ -130,6 +131,22 @@
  */
 .align	11
 EXPORT(el1_vector)
+exception_entry	sync_el1t
+exception_entry	irq_el1t
+exception_entry	fiq_el1t
+exception_entry	error_el1t
+exception_entry	sync_el1h
+exception_entry	irq_el1h
+exception_entry	fiq_el1h
+exception_entry	error_el1h
+exception_entry	sync_el0_64
+exception_entry	irq_el0_64
+exception_entry	fiq_el0_64
+exception_entry	error_el0_64
+exception_entry	sync_el0_32
+exception_entry	irq_el0_32
+exception_entry	fiq_el0_32
+exception_entry	error_el0_32
 
 sync_el1t:
 	handle_entry	1, SYNC_EL1t
@@ -181,7 +198,7 @@ el0_syscall:
 	stp	x12, x13, [sp, #16 * 6]
 	stp	x14, x15, [sp, #16 * 7]
 
-	bl lock_kernel
+	bl	lock_kernel
 
 	ldp	x0, x1, [sp, #16 * 0]
 	ldp	x2, x3, [sp, #16 * 1]

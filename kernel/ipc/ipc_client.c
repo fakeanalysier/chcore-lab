@@ -131,7 +131,7 @@ static int create_connection(struct thread *source, struct thread *target,
 	buf_size = MIN(vm_config->buf_size, client_vm_config->buf_size);
 	client_vm_config->buf_size = buf_size;
 	kdebug("server buf base:%lx size:%lx, client base:%lx\n",
-	       server_stack_base, stack_size, client_buf_base);
+	       server_buf_base, buf_size, client_buf_base);
 
 	buf_pmo = kmalloc(sizeof(struct pmobject));
 	if (!buf_pmo) {
@@ -161,6 +161,9 @@ static int create_connection(struct thread *source, struct thread *target,
 		goto out_free_obj;
 	}
 	conn->server_conn_cap = server_conn_cap;
+
+	// Set callback address
+	conn->callback = server_ipc_config->callback;
 
 	return conn_cap;
 out_free_stack_pmo:

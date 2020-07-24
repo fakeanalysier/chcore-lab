@@ -174,6 +174,10 @@ static u64 load_binary(struct process *process, struct vmspace *vmspace,
 			 * page aligned segment size. Take care of the page alignment when allocating
 			 * and mapping physical memory.
 			 */
+			p_vaddr = elf->p_headers[i].p_vaddr;
+			seg_sz = elf->p_headers[i].p_memsz;
+			seg_map_sz = ROUND_UP(p_vaddr + seg_sz, PAGE_SIZE) -
+				     ROUND_DOWN(p_vaddr, PAGE_SIZE);
 
 			pmo = obj_alloc(TYPE_PMO, sizeof(*pmo));
 			if (!pmo) {
@@ -192,6 +196,11 @@ static u64 load_binary(struct process *process, struct vmspace *vmspace,
 			 * You should copy data from the elf into the physical memory in pmo.
 			 * The physical address of a pmo can be get from pmo->start.
 			 */
+			vaddr_t pmo_start_va = phys_to_virt(pmo->start);
+			memset((void *)pmo_start_va, 0, seg_map_sz);
+			memcpy((void *)(pmo_start_va + (p_vaddr & OFFSET_MASK)),
+			       (void *)((u64)bin + elf->p_headers[i].p_offset),
+			       elf->p_headers[i].p_filesz);
 
 			flags = PFLAGS2VMRFLAGS(elf->p_headers[i].p_flags);
 
@@ -337,7 +346,7 @@ void sys_exit(int ret)
 	/* Set current running thread to NULL */
 	current_threads[cpuid] = NULL;
 	/* Reschedule */
-	cur_sched_ops->sched();
+	sched();
 	eret_to_thread(switch_context());
 }
 
@@ -366,7 +375,7 @@ int sys_create_thread(u64 process_cap, u64 stack, u64 pc, u64 arg, u32 prio,
 int sys_set_affinity(u64 thread_cap, s32 aff)
 {
 	struct thread *thread = NULL;
-	int cpuid = smp_get_cpu_id(), ret = 0;
+	int cpuid = smp_get_cpu_id();
 
 	/* currently, we use -1 to represent the current thread */
 	if (thread_cap == -1) {
@@ -380,10 +389,13 @@ int sys_set_affinity(u64 thread_cap, s32 aff)
 	* Lab 4
 	* Finish the sys_set_affinity
 	*/
+	if (!thread || !thread->thread_ctx)
+		return -1;
+	thread->thread_ctx->affinity = aff;
 
 	if (thread_cap != -1)
 		obj_put((void *)thread);
-	return ret;
+	return 0;
 }
 
 int sys_get_affinity(u64 thread_cap)
@@ -404,6 +416,9 @@ int sys_get_affinity(u64 thread_cap)
 	* Lab 4
 	* Finish the sys_get_affinity
 	*/
+	if (!thread || !thread->thread_ctx)
+		return -1;
+	aff = thread->thread_ctx->affinity;
 
 	if (thread_cap != -1)
 		obj_put((void *)thread);

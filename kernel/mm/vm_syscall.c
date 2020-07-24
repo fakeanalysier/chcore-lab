@@ -317,6 +317,7 @@ u64 sys_handle_brk(u64 addr)
 {
 	struct vmspace *vmspace;
 	struct pmobject *pmo;
+	int pmo_cap;
 	struct vmregion *vmr;
 	size_t len;
 	u64 retval;
@@ -345,6 +346,45 @@ u64 sys_handle_brk(u64 addr)
 	 * top.
 	 *
 	 */
+	if (addr == 0) {
+		pmo = obj_alloc(TYPE_PMO, sizeof(*pmo));
+		if (!pmo) {
+			ret = -ENOMEM;
+			goto out_fail;
+		}
+		pmo_init(pmo, PMO_ANONYM, 0, 0);
+		pmo_cap = cap_alloc(current_process, pmo, 0);
+		if (pmo_cap < 0) {
+			ret = pmo_cap;
+			goto out_free_obj_pmo;
+		}
+
+		vmr = init_heap_vmr(vmspace, vmspace->user_current_heap, pmo);
+		if (!vmr) {
+			ret = -ENOMEM;
+			goto out_free_cap_pmo;
+		}
+		vmspace->heap_vmr = vmr;
+		retval = vmr->start; // currently size == 0, heap top == start
+	} else {
+		vmr = vmspace->heap_vmr;
+		if (!vmr) {
+			ret = -EINVAL;
+			goto out_fail;
+		}
+
+		u64 old_addr = vmr->start + vmr->size;
+		if (addr > old_addr) {
+			len = ROUND_UP(addr - vmr->start, PAGE_SIZE);
+			vmr->size = vmr->pmo->size = len;
+			retval = vmr->start + len; // new heap top
+		} else if (addr < old_addr) {
+			ret = -EINVAL; // not supported
+			goto out_fail;
+		} else { // addr == old_addr
+			retval = old_addr; // do nothing
+		}
+	}
 
 	/*
 	 * return origin heap addr on failure;
@@ -352,4 +392,12 @@ u64 sys_handle_brk(u64 addr)
 	 */
 	obj_put(vmspace);
 	return retval;
+
+out_free_cap_pmo:
+	cap_free(current_process, pmo_cap);
+	pmo = NULL;
+out_free_obj_pmo:
+	obj_free(pmo);
+out_fail:
+	return ret;
 }
