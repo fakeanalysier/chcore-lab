@@ -23,7 +23,13 @@ int fs_server_mkdir(const char *path, mode_t mode)
 	WARN_ON(mode, "mode is ignored by fs_server_mkdir");
 
 	// TODO(Lab5): your code here
-
+	err = tfs_namex(&dirat, &leaf, 0);
+	if (err == 0) {
+		err = -EEXIST;
+	} else if (err == -ENOENT && !strstr(leaf, "/")) {
+		// parent exists, leaf doesn't
+		err = tfs_mkdir(dirat, leaf, strlen(leaf));
+	}
 	return err;
 }
 
@@ -38,7 +44,13 @@ int fs_server_creat(const char *path, mode_t mode)
 	WARN_ON(mode, "mode is ignored by fs_server_creat");
 
 	// TODO(Lab5): your code here
-
+	err = tfs_namex(&dirat, &leaf, 0);
+	if (err == 0) {
+		err = -EEXIST;
+	} else if (err == -ENOENT && !strstr(leaf, "/")) {
+		// parent exists, leaf doesn't
+		err = tfs_creat(dirat, leaf, strlen(leaf));
+	}
 	return err;
 }
 
@@ -46,28 +58,31 @@ int fs_server_unlink(const char *path)
 {
 	struct inode *dirat = NULL;
 	const char *leaf = path;
-	int err;
 
 	BUG_ON(!path);
 	BUG_ON(*path != '/');
 
 	// TODO(Lab5): your code here
-
-	return err;
+	if (tfs_namex(&dirat, &leaf, 0))
+		return -ENOENT;
+	// TODO: check if path is reg file
+	return tfs_remove(dirat, leaf, strlen(leaf));
 }
 
 int fs_server_rmdir(const char *path)
 {
 	struct inode *dirat = NULL;
 	const char *leaf = path;
-	int err;
 
 	BUG_ON(!path);
 	BUG_ON(*path != '/');
 
 	// TODO(Lab5): your code here
-
-	return err;
+	if (tfs_namex(&dirat, &leaf, 0))
+		return -ENOENT;
+	// TODO: check if path is dir
+	// TODO: handle dir path ending with '/'
+	return tfs_remove(dirat, leaf, strlen(leaf));
 }
 
 /* use absolute path, offset and count to read directly */
@@ -80,7 +95,13 @@ int fs_server_read(const char *path, off_t offset, void *buf, size_t count)
 	BUG_ON(*path != '/');
 
 	// TODO(Lab5): your code here
-
+	inode = tfs_open_path(path);
+	if (inode && inode->type == FS_REG) {
+		if (offset > inode->size)
+			ret = -EINVAL;
+		else
+			ret = tfs_file_read(inode, offset, buf, count);
+	}
 	return ret;
 }
 
@@ -95,7 +116,13 @@ int fs_server_write(const char *path, off_t offset, const void *buf,
 	BUG_ON(*path != '/');
 
 	// TODO(Lab5): your code here
-
+	inode = tfs_open_path(path);
+	if (inode && inode->type == FS_REG) {
+		if (offset > inode->size)
+			ret = -EINVAL;
+		else
+			ret = tfs_file_write(inode, offset, buf, count);
+	}
 	return ret;
 }
 

@@ -5,6 +5,14 @@
 #include <string.h>
 #include <cpio.h>
 #include <launcher.h>
+#include <stat.h>
+
+#ifndef MAX
+#define MAX(x, y) ((x) < (y) ? (y) : (x))
+#endif
+#ifndef MIN
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#endif
 
 static struct inode *tmpfs_root;
 
@@ -131,6 +139,18 @@ static int tfs_mknod(struct inode *dir, const char *name, size_t len, int mkdir)
 	}
 
 	// TODO(Lab5): write your code here
+	if (mkdir)
+		inode = new_dir();
+	else
+		inode = new_reg();
+	if (IS_ERR(inode))
+		return inode;
+
+	dent = new_dent(inode, name, len);
+	if (IS_ERR(dent))
+		return dent;
+
+	htable_add(&dir->dentries, (u32)dent->name.hash, &dent->node);
 
 	return 0;
 }
@@ -182,6 +202,7 @@ int tfs_namex(struct inode **dirat, const char **name, int mkdir_p)
 	int i;
 	struct dentry *dent;
 	int err;
+	bool intermediate;
 
 	if (**name == '/') {
 		*dirat = tmpfs_root;
@@ -201,8 +222,53 @@ int tfs_namex(struct inode **dirat, const char **name, int mkdir_p)
 	// `tfs_lookup` and `tfs_mkdir` are very useful
 	// </lab5>
 
+	// read next component to buff
+	for (i = 0; i < MAX_FILENAME_LEN && (*name)[i] && (*name)[i] != '/';
+	     i++)
+		buff[i] = (*name)[i];
+	if (i == MAX_FILENAME_LEN)
+		return -EINVAL;
+	buff[i] = '\0';
+
+	if (!(*name)[i])
+		intermediate = false;
+	else
+		intermediate = true;
+
+	dent = tfs_lookup(*dirat, buff, i);
+	if (!dent) {
+		if (intermediate && mkdir_p) {
+			err = tfs_mkdir(*dirat, buff, i);
+			if (IS_ERR(err))
+				return err;
+			dent = tfs_lookup(*dirat, buff, i);
+		} else {
+			return -ENOENT;
+		}
+	}
+
+	// assert dent != NULL
+	if (intermediate) {
+		// step into next level
+		*dirat = dent->inode;
+		*name += i;
+		while (**name && **name == '/')
+			++(*name);
+		if (dent->inode->type != FS_DIR)
+			return -ENOTDIR;
+		if (!**name) // the last dir component done
+			return 0;
+		return tfs_namex(dirat, name, mkdir_p);
+	} else {
+		// no matter dent is a dir or a reg,
+		// we are done here.
+		// *name is now the leaf filename,
+		// *dirat is the parent dir of the leaf.
+		return 0;
+	}
+
 	/* we will never reach here? */
-	return 0;
+	// return 0;
 }
 
 int tfs_remove(struct inode *dir, const char *name, size_t len)
@@ -286,7 +352,25 @@ ssize_t tfs_file_write(struct inode *inode, off_t offset, const char *data,
 	void *page;
 
 	// TODO(Lab5): write your code here
+	while (size > 0) {
+		page_no = cur_off / PAGE_SIZE;
+		page_off = cur_off % PAGE_SIZE;
+		to_write = MIN(PAGE_SIZE - page_off, size);
+		page = radix_get(&inode->data, page_no);
+		if (!page) {
+			page = malloc(PAGE_SIZE);
+			if (!page)
+				goto out;
+			radix_add(&inode->data, page_no, page);
+		}
+		memcpy(page + page_off, data, to_write);
+		data += to_write;
+		cur_off += to_write;
+		size -= to_write;
+	}
 
+out:
+	inode->size = MAX(cur_off, inode->size);
 	return cur_off - offset;
 }
 
@@ -306,7 +390,20 @@ ssize_t tfs_file_read(struct inode *inode, off_t offset, char *buff,
 	void *page;
 
 	// TODO(Lab5): write your code here
+	while (size > 0 && cur_off <= inode->size) {
+		page_no = cur_off / PAGE_SIZE;
+		page_off = cur_off % PAGE_SIZE;
+		to_read = MIN(PAGE_SIZE - page_off, size);
+		page = radix_get(&inode->data, page_no);
+		if (!page)
+			goto out;
+		memcpy(buff, page + page_off, to_read);
+		buff += to_read;
+		cur_off += to_read;
+		size -= to_read;
+	}
 
+out:
 	return cur_off - offset;
 }
 
@@ -330,6 +427,30 @@ int tfs_load_image(const char *start)
 
 	for (f = g_files.head.next; f; f = f->next) {
 		// TODO(Lab5): your code is here
+		if (0 == strcmp(f->name, "."))
+			continue;
+		dirat = tmpfs_root;
+		leaf = f->name;
+		err = tfs_namex(&dirat, &leaf, 0);
+		if (err != -ENOENT || strstr(leaf, "/"))
+			return err ? err : -EEXIST;
+		len = strlen(leaf);
+		if (S_ISDIR(f->header.c_mode)) {
+			err = tfs_mkdir(dirat, leaf, len);
+			if (err)
+				return err;
+		} else if (S_ISREG(f->header.c_mode)) {
+			err = tfs_creat(dirat, leaf, len);
+			if (err)
+				return err;
+			dent = tfs_lookup(dirat, leaf, len);
+			// assert dent
+			write_count = tfs_file_write(dent->inode, 0, f->data,
+						     f->header.c_filesize);
+			if (write_count < f->header.c_filesize)
+				return -ENOSPC;
+		}
+		// ignore other f->header.c_mode
 	}
 
 	return 0;
