@@ -9,7 +9,7 @@ char getch()
 {
 	char c;
 	// TODO(Lab5): your code here
-
+	c = usys_getc();
 	return c;
 }
 

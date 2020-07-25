@@ -44,7 +44,13 @@ char *readline(const char *prompt)
 		if (c < 0)
 			return NULL;
 		// TODO(Lab5): your code here
+		if (c == '\r' || i == BUFLEN - 1)
+			break;
+		buf[i++] = c;
+		usys_putc(c);
 	}
+	buf[i] = '\0';
+	printf("\n");
 	return buf;
 }
 
