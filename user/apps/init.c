@@ -20,6 +20,11 @@ int fs_server_cap;
 
 #define BUFLEN 4096
 
+#define MAX_PATH_LEN 512
+static char cwd[MAX_PATH_LEN + 1] = { 0 };
+
+#define BUILTIN_CMD_MAX_LEN 16
+
 extern char getch();
 
 // read a command from stdin leading by `prompt`
@@ -44,7 +49,7 @@ char *readline(const char *prompt)
 		if (c < 0)
 			return NULL;
 		// TODO(Lab5): your code here
-		if (c == '\r' || i == BUFLEN - 1)
+		if (c == '\r' || c == '\n' || i == BUFLEN - 1)
 			break;
 		buf[i++] = c;
 		usys_putc(c);
@@ -54,12 +59,74 @@ char *readline(const char *prompt)
 	return buf;
 }
 
+static void builtin_cmd_ls(const char *arg)
+{
+}
+
+static void builtin_cmd_cd(const char *arg)
+{
+}
+
+static void builtin_cmd_pwd(const char *arg)
+{
+	if (*arg != '\0') {
+		printf("pwd: too many arguments");
+		return;
+	}
+	if (*cwd == '\0') {
+		printf("/\n");
+	} else {
+		printf("%s\n", cwd);
+	}
+}
+
+static void builtin_cmd_echo(const char *arg)
+{
+	printf("%s\n", arg);
+}
+
+static void builtin_cmd_cat(const char *arg)
+{
+}
+
+static void builtin_cmd_top(const char *arg)
+{
+}
+
 // run `ls`, `echo`, `cat`, `cd`, `top`
 // return true if `cmdline` is a builtin command
 int builtin_cmd(char *cmdline)
 {
 	// TODO(Lab5): your code here
-	return 0;
+	// assert: no \r and \n in cmdline
+	char cmd[BUILTIN_CMD_MAX_LEN + 1];
+	char *arg = cmdline;
+	size_t len = strlen(cmdline);
+	int i = 0;
+	while (i < len && *arg != ' ') {
+		if (i == BUILTIN_CMD_MAX_LEN)
+			return 0;
+		cmd[i++] = *arg++;
+	}
+	cmd[i] = '\0';
+	while (*arg == ' ')
+		arg++;
+	if (0 == strcmp(cmd, "ls")) {
+		builtin_cmd_ls(arg);
+	} else if (0 == strcmp(cmd, "cd")) {
+		builtin_cmd_cd(arg);
+	} else if (0 == strcmp(cmd, "pwd")) {
+		builtin_cmd_pwd(arg);
+	} else if (0 == strcmp(cmd, "echo")) {
+		builtin_cmd_echo(arg);
+	} else if (0 == strcmp(cmd, "cat")) {
+		builtin_cmd_cat(arg);
+	} else if (0 == strcmp(cmd, "top")) {
+		builtin_cmd_top(arg);
+	} else {
+		return 0;
+	}
+	return 1;
 }
 
 // run other command, such as execute an executable file
