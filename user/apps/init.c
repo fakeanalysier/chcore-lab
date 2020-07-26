@@ -20,8 +20,8 @@ int fs_server_cap;
 
 #define BUFLEN 4096
 
-#define MAX_PATH_LEN 512
-static char cwd[MAX_PATH_LEN + 1] = { 0 };
+#define MAX_PATH_LEN 256
+static char cwd[MAX_PATH_LEN] = { 0 };
 
 #define BUILTIN_CMD_MAX_LEN 16
 
@@ -59,12 +59,97 @@ char *readline(const char *prompt)
 	return buf;
 }
 
+static const char *getcwd()
+{
+	if (*cwd) {
+		return cwd;
+	} else {
+		return "/";
+	}
+}
+
 static void builtin_cmd_ls(const char *arg)
 {
+	struct fs_request req = {
+		.req = FS_REQ_SCAN,
+		.count = PAGE_SIZE,
+		.offset = 0,
+	};
+	if (!*arg) {
+		strcpy(req.path, getcwd());
+	} else if (*arg == '/') {
+		strcpy(req.path, arg);
+	} else {
+		strcpy(req.path, cwd);
+		strcat(req.path, "/");
+		strcat(req.path, arg);
+	}
+	int ret;
+	do {
+		ipc_msg_t *ipc_msg =
+			ipc_create_msg(&ipc_struct, sizeof(req), 1);
+		ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
+		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
+		ret = ipc_call(&ipc_struct, ipc_msg);
+		if (ret < 0) {
+			printf("ls: failed to list files, ret: %d\n", ret);
+			return;
+		}
+		req.offset += ret;
+		struct dirent *dirent = (struct dirent *)TMPFS_SCAN_BUF_VADDR;
+		for (int i = 0; i < ret; i++) {
+			printf("%s\n", dirent->d_name);
+			dirent = (void *)dirent + dirent->d_reclen;
+		}
+		ipc_destroy_msg(ipc_msg);
+	} while (ret != 0);
 }
 
 static void builtin_cmd_cd(const char *arg)
 {
+	if (!*arg) {
+		printf("cd: too few arguments\n");
+		return;
+	}
+
+	if (0 == strcmp(arg, "/")) {
+		cwd[0] = '\0'; // cd to /
+		return;
+	}
+
+	struct fs_request req = {
+		.req = FS_REQ_SCAN,
+		.count = PAGE_SIZE,
+		.offset = 0,
+	};
+
+	if (*arg == '/') {
+		strcpy(req.path, arg);
+	} else {
+		strcpy(req.path, cwd);
+		strcat(req.path, "/");
+		strcat(req.path, arg);
+	}
+
+	ipc_msg_t *ipc_msg = ipc_create_msg(&ipc_struct, sizeof(req), 1);
+	ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
+	ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
+	int ret = ipc_call(&ipc_struct, ipc_msg);
+
+	if (ret >= 0) {
+		if (*arg == '/') {
+			strcpy(cwd, *(arg + 1) ? arg : "");
+		} else {
+			strcat(cwd, "/");
+			strcat(cwd, arg);
+		}
+	} else if (ret == -ENOENT) {
+		printf("cd: no such directory\n");
+	} else if (ret == -ENOTDIR) {
+		printf("cd: not a directory\n");
+	} else {
+		printf("cd: failed due to unknown reason\n");
+	}
 }
 
 static void builtin_cmd_pwd(const char *arg)
@@ -73,11 +158,7 @@ static void builtin_cmd_pwd(const char *arg)
 		printf("pwd: too many arguments");
 		return;
 	}
-	if (*cwd == '\0') {
-		printf("/\n");
-	} else {
-		printf("%s\n", cwd);
-	}
+	printf("%s\n", getcwd());
 }
 
 static void builtin_cmd_echo(const char *arg)
@@ -99,12 +180,12 @@ int builtin_cmd(char *cmdline)
 {
 	// TODO(Lab5): your code here
 	// assert: no \r and \n in cmdline
-	char cmd[BUILTIN_CMD_MAX_LEN + 1];
+	char cmd[BUILTIN_CMD_MAX_LEN];
 	char *arg = cmdline;
 	size_t len = strlen(cmdline);
 	int i = 0;
 	while (i < len && *arg != ' ') {
-		if (i == BUILTIN_CMD_MAX_LEN)
+		if (i == BUILTIN_CMD_MAX_LEN - 1)
 			return 0;
 		cmd[i++] = *arg++;
 	}

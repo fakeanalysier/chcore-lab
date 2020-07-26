@@ -8,6 +8,7 @@
 static void fs_dispatch(ipc_msg_t *ipc_msg)
 {
 	int ret = 0;
+	int cap = ipc_get_msg_cap(ipc_msg, 0);
 
 	if (ipc_msg->data_len >= 4) {
 		struct fs_request *fr =
@@ -15,8 +16,15 @@ static void fs_dispatch(ipc_msg_t *ipc_msg)
 		switch (fr->req) {
 			// TODO(Lab5): your code here
 		case FS_REQ_SCAN:
-			ret = fs_server_scan(fr->path, fr->offset, fr->buff,
-					     fr->count); // TODO: buff vmspace
+			fail_cond(cap < 0, "no scan buf cap\n");
+			ret = usys_map_pmo(SELF_CAP, cap, TMPFS_SCAN_BUF_VADDR,
+					   VM_READ | VM_WRITE);
+			fail_cond(ret < 0,
+				  "usys_map_pmo on scan buf pmo ret %d\n", ret);
+			ret = fs_server_scan(fr->path, fr->offset,
+					     (void *)TMPFS_SCAN_BUF_VADDR,
+					     fr->count);
+			usys_unmap_pmo(SELF_CAP, cap, TMPFS_SCAN_BUF_VADDR);
 			break;
 		case FS_REQ_MKDIR:
 			ret = fs_server_mkdir(fr->path, fr->mode);

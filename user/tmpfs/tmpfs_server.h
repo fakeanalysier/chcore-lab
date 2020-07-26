@@ -20,4 +20,4 @@ int fs_server_write(const char *path, off_t offset, const void *buf,
 ssize_t fs_server_get_size(const char *path);
 
 int fs_server_scan(const char *path, unsigned int start, void *buf,
-		   unsigned int count);
+		   unsigned int buf_size);

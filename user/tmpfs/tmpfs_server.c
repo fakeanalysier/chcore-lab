@@ -161,7 +161,7 @@ static int fs_server_close(int fd)
  * The caller should call this function over and over again until it returns 0
  * */
 int fs_server_scan(const char *path, unsigned int start, void *buf,
-		   unsigned int count)
+		   unsigned int buf_size)
 {
 	struct inode *inode;
 
@@ -171,7 +171,7 @@ int fs_server_scan(const char *path, unsigned int start, void *buf,
 	inode = tfs_open_path(path);
 	if (inode) {
 		if (inode->type == FS_DIR)
-			return tfs_scan(inode, start, buf, buf + count);
+			return tfs_scan(inode, start, buf, buf + buf_size);
 		return -ENOTDIR;
 	}
 	return -ENOENT;
