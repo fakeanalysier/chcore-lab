@@ -390,6 +390,7 @@ ssize_t tfs_file_read(struct inode *inode, off_t offset, char *buff,
 	void *page;
 
 	// TODO(Lab5): write your code here
+	size = MIN(inode->size - offset, size);
 	while (size > 0 && cur_off <= inode->size) {
 		page_no = cur_off / PAGE_SIZE;
 		page_off = cur_off % PAGE_SIZE;

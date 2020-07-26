@@ -91,6 +91,7 @@ static void builtin_cmd_ls(const char *arg)
 		ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
 		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
 		ret = ipc_call(&ipc_struct, ipc_msg);
+		ipc_destroy_msg(ipc_msg);
 		if (ret < 0) {
 			printf("ls: failed to list files, ret: %d\n", ret);
 			return;
@@ -101,7 +102,6 @@ static void builtin_cmd_ls(const char *arg)
 			printf("%s\n", dirent->d_name);
 			dirent = (void *)dirent + dirent->d_reclen;
 		}
-		ipc_destroy_msg(ipc_msg);
 	} while (ret != 0);
 }
 
@@ -135,6 +135,7 @@ static void builtin_cmd_cd(const char *arg)
 	ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
 	ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
 	int ret = ipc_call(&ipc_struct, ipc_msg);
+	ipc_destroy_msg(ipc_msg);
 
 	if (ret >= 0) {
 		if (*arg == '/') {
@@ -168,6 +169,43 @@ static void builtin_cmd_echo(const char *arg)
 
 static void builtin_cmd_cat(const char *arg)
 {
+	if (!*arg) {
+		printf("cd: too few arguments\n");
+		return;
+	}
+
+	struct fs_request req = {
+		.req = FS_REQ_READ,
+		.count = PAGE_SIZE - 1,
+		.offset = 0,
+	};
+
+	if (*arg == '/') {
+		strcpy(req.path, arg);
+	} else {
+		strcpy(req.path, cwd);
+		strcat(req.path, "/");
+		strcat(req.path, arg);
+	}
+
+	char *buff = (char *)TMPFS_SCAN_BUF_VADDR;
+	int read_count;
+	do {
+		ipc_msg_t *ipc_msg =
+			ipc_create_msg(&ipc_struct, sizeof(req), 1);
+		ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
+		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
+		read_count = ipc_call(&ipc_struct, ipc_msg);
+		ipc_destroy_msg(ipc_msg);
+		if (read_count < 0) {
+			printf("cat: failed to read file, ret: %d\n",
+			       read_count);
+			return;
+		}
+		req.offset += read_count;
+		buff[read_count] = '\0';
+		printf("%s", buff);
+	} while (read_count == req.count);
 }
 
 static void builtin_cmd_top(const char *arg)

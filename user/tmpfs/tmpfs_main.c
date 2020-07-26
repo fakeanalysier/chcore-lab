@@ -39,12 +39,21 @@ static void fs_dispatch(ipc_msg_t *ipc_msg)
 			ret = fs_server_unlink(fr->path);
 			break;
 		case FS_REQ_WRITE:
+			// TODO: currently we ignore buff mapping here,
+			// since we are not using this request type
 			ret = fs_server_write(fr->path, fr->offset, fr->buff,
 					      fr->count);
 			break;
 		case FS_REQ_READ:
-			ret = fs_server_read(fr->path, fr->offset, fr->buff,
+			fail_cond(cap < 0, "no read buf cap\n");
+			ret = usys_map_pmo(SELF_CAP, cap, TMPFS_READ_BUF_VADDR,
+					   VM_READ | VM_WRITE);
+			fail_cond(ret < 0,
+				  "usys_map_pmo on read buf pmo ret %d\n", ret);
+			ret = fs_server_read(fr->path, fr->offset,
+					     (void *)TMPFS_READ_BUF_VADDR,
 					     fr->count);
+			usys_unmap_pmo(SELF_CAP, cap, TMPFS_READ_BUF_VADDR);
 			break;
 		case FS_REQ_GET_SIZE:
 			ret = fs_server_get_size(fr->path);
