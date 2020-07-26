@@ -191,3 +191,8 @@ int usys_transfer_caps(u64 process, int *src_caps, int nr, int *dst_caps)
 	return syscall(SYS_transfer_caps, process, (u64)src_caps, (u64)nr,
 		       (u64)dst_caps, 0, 0, 0, 0, 0);
 }
+
+void usys_ugly_top(void)
+{
+	return syscall(SYS_ugly_top, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+}

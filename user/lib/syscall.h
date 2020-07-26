@@ -73,3 +73,6 @@ int usys_map_pmos(u64, void *, u64);
 int usys_write_pmo(u64, u64, void *, u64);
 int usys_read_pmo(u64 cap, u64 offset, void *buf, u64 size);
 int usys_transfer_caps(u64, int *, int, int *);
+
+#define SYS_ugly_top 233
+void usys_ugly_top(void);

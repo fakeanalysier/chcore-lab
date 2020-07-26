@@ -79,3 +79,6 @@ void sys_ipc_return(void);
 /* TEMP */
 #define SYS_fs_load_cpio 253
 #define SYS_debug        255
+
+#define SYS_ugly_top 233
+void sys_ugly_top(void);

@@ -210,6 +210,7 @@ static void builtin_cmd_cat(const char *arg)
 
 static void builtin_cmd_top(const char *arg)
 {
+	usys_ugly_top();
 }
 
 // run `ls`, `echo`, `cat`, `cd`, `top`

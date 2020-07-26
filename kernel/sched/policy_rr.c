@@ -191,3 +191,20 @@ struct sched_ops rr = {
 	.sched_choose_thread = rr_sched_choose_thread,
 	.sched_handle_timer_irq = rr_sched_handle_timer_irq,
 };
+
+void sys_ugly_top(void)
+{
+	struct thread *thread;
+	printk("Current CPU %d\n", smp_get_cpu_id());
+	for (int i = 0; i < PLAT_CPU_NUM; i++) {
+		printk("===== CPU %d =====\n", i);
+		thread = current_threads[i];
+		if (thread)
+			print_thread(thread);
+		for_each_in_list(thread, struct thread, ready_queue_node,
+				 &rr_ready_queue[i])
+		{
+			print_thread(thread);
+		}
+	}
+}
