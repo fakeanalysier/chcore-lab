@@ -284,6 +284,8 @@ int run_cmd(char *cmdline)
 	ret = readelf_from_fs(pathbuf, &user_elf);
 	if (ret < 0)
 		return ret;
+	// TODO: 运行一些程序会出现无效指令的情况, 例如 ipc_mem.bin,
+	// 但 ipc_reg.bin 可以完整运行, 有待进一步 debug.
 	ret = launch_process_with_pmos_caps(&user_elf, NULL, &new_thread_cap,
 					    NULL, 0, NULL, 0, 0);
 	// ret = run_cmd_from_kernel_cpio("/ipc_mem.bin", &new_thread_cap, NULL,
