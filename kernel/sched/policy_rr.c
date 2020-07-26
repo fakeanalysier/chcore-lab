@@ -198,13 +198,20 @@ void sys_ugly_top(void)
 	printk("Current CPU %d\n", smp_get_cpu_id());
 	for (int i = 0; i < PLAT_CPU_NUM; i++) {
 		printk("===== CPU %d =====\n", i);
+		bool idle_printed = false;
 		thread = current_threads[i];
-		if (thread)
+		if (thread) {
 			print_thread(thread);
+			if (thread->thread_ctx &&
+			    thread->thread_ctx->type == TYPE_IDLE)
+				idle_printed = true;
+		}
 		for_each_in_list(thread, struct thread, ready_queue_node,
 				 &rr_ready_queue[i])
 		{
 			print_thread(thread);
 		}
+		if (!idle_printed)
+			print_thread(&idle_threads[i]);
 	}
 }
