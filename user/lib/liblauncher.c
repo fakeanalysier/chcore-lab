@@ -115,8 +115,62 @@ int readelf_from_fs(const char *pathbuf, struct user_elf *user_elf)
 {
 	int ret;
 	int tmpfs_read_pmo_cap;
+	u64 size;
 
 	// TODO(Lab5): your code here
+	struct fs_request req;
+	strcpy(req.path, pathbuf);
+	{
+		// get size
+		req.req = FS_REQ_GET_SIZE;
+		ipc_msg_t *ipc_msg =
+			ipc_create_msg(tmpfs_ipc_struct, sizeof(req), 0);
+		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
+		ret = ipc_call(tmpfs_ipc_struct, ipc_msg);
+		ipc_destroy_msg(ipc_msg);
+		if (ret < 0) {
+			goto out;
+		} else if (ret == 0) {
+			ret = -EINVAL;
+			goto out;
+		}
+		size = (u64)ret;
+		// printf("size: %lu\n", size);
 
+		// create pmo
+		ret = usys_create_pmo(size, PMO_DATA);
+		if (ret < 0)
+			goto out;
+		tmpfs_read_pmo_cap = ret;
+		ret = usys_map_pmo(SELF_CAP, tmpfs_read_pmo_cap,
+				   TMPFS_READ_BUF_VADDR, VM_READ | VM_WRITE);
+		if (ret < 0)
+			goto out_free_pmo;
+	}
+	{
+		// read elf binary
+		req.req = FS_REQ_READ;
+		req.count = size;
+		req.offset = 0;
+		ipc_msg_t *ipc_msg =
+			ipc_create_msg(tmpfs_ipc_struct, sizeof(req), 1);
+		ipc_set_msg_cap(ipc_msg, 0, tmpfs_read_pmo_cap);
+		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
+		ret = ipc_call(tmpfs_ipc_struct, ipc_msg);
+		// printf("read ret: %d\n", ret);
+		ipc_destroy_msg(ipc_msg);
+		if (ret < 0)
+			goto out_unmap_pmo;
+	}
+
+	// parse elf
+	ret = parse_elf_from_binary((void *)TMPFS_READ_BUF_VADDR, user_elf);
+	// printf("user_elf->elf_meta.phnum: %lu\n", user_elf->elf_meta.phnum);
+
+out_unmap_pmo:
+	usys_unmap_pmo(SELF_CAP, tmpfs_read_pmo_cap, TMPFS_READ_BUF_VADDR);
+out_free_pmo:
+	// free tmpfs_read_pmo
+out:
 	return ret;
 }

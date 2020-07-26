@@ -248,11 +248,50 @@ int builtin_cmd(char *cmdline)
 	return 1;
 }
 
+static void ugly_wait(int thread_cap)
+{
+	// this is really ugly!
+	int ret;
+	do {
+		usys_yield();
+		ret = usys_get_affinity(thread_cap);
+	} while (ret >= 0);
+}
+
+static int run_cmd_from_kernel_cpio(const char *filename, int *new_thread_cap,
+				    struct pmo_map_request *pmo_map_reqs,
+				    int nr_pmo_map_reqs);
+
 // run other command, such as execute an executable file
 // return true if run sccessfully
 int run_cmd(char *cmdline)
 {
-	return 0;
+	if (!*cmdline)
+		return 0;
+
+	char pathbuf[MAX_PATH_LEN];
+	if (*cmdline == '/') {
+		strcpy(pathbuf, cmdline);
+	} else {
+		strcpy(pathbuf, cwd);
+		strcat(pathbuf, "/");
+		strcat(pathbuf, cmdline);
+	}
+
+	struct user_elf user_elf;
+	int ret;
+	int new_thread_cap;
+	ret = readelf_from_fs(pathbuf, &user_elf);
+	if (ret < 0)
+		return ret;
+	ret = launch_process_with_pmos_caps(&user_elf, NULL, &new_thread_cap,
+					    NULL, 0, NULL, 0, 0);
+	// ret = run_cmd_from_kernel_cpio("/ipc_mem.bin", &new_thread_cap, NULL,
+	// 			       0);
+	if (ret < 0)
+		return ret;
+	ugly_wait(new_thread_cap);
+	return 1;
 }
 
 static int run_cmd_from_kernel_cpio(const char *filename, int *new_thread_cap,
