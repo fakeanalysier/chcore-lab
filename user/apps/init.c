@@ -36,7 +36,10 @@ static const char *getcwd()
 	}
 }
 
-// walk through a directory, run callback for each dirent
+// walk through a directory, run callback for each dirent,
+// return 1 if any callback call returns true, interrupting the walking,
+// return 0 if no callback interrupted the walking,
+// return < 0 if any error occurred.
 static int walk(const char *dir, bool (*callback)(struct dirent *, void *),
 		void *data)
 {
@@ -60,7 +63,7 @@ static int walk(const char *dir, bool (*callback)(struct dirent *, void *),
 	}
 
 	int ret;
-	int count = 0;
+	// int count = 0;
 	do {
 		ipc_msg_t *ipc_msg =
 			ipc_create_msg(&ipc_struct, sizeof(req), 1);
@@ -68,19 +71,39 @@ static int walk(const char *dir, bool (*callback)(struct dirent *, void *),
 		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
 		ret = ipc_call(&ipc_struct, ipc_msg);
 		ipc_destroy_msg(ipc_msg);
-		if (ret < 0) {
+		if (ret < 0)
 			return ret;
-		}
 		req.offset += ret;
 		struct dirent *dirent = (struct dirent *)TMPFS_SCAN_BUF_VADDR;
 		for (int i = 0; i < ret; i++) {
-			count++;
+			// count++;
 			if (callback(dirent, data))
-				return count;
+				return 1;
 			dirent = (void *)dirent + dirent->d_reclen;
 		}
 	} while (ret != 0);
-	return count;
+	return 0;
+}
+
+struct tab_comp_data {
+	char complement[BUFLEN];
+	int tab_count;
+	int walk_count;
+	char *buf;
+	int *buf_index;
+};
+
+static bool _readline_tab_comp_walk_cb(struct dirent *dent, void *data)
+{
+	struct tab_comp_data *comp_data = data;
+	if (0 == strncmp(dent->d_name, comp_data->buf, *comp_data->buf_index)) {
+		comp_data->walk_count++;
+		if (comp_data->walk_count == comp_data->tab_count) {
+			strcpy(comp_data->complement, dent->d_name);
+			return true; // we are done, stop walking
+		}
+	}
+	return false;
 }
 
 // read a command from stdin leading by `prompt`
@@ -93,8 +116,14 @@ char *readline(const char *prompt)
 	int i = 0, j = 0;
 	signed char c = 0;
 	int ret = 0;
-	char complement[BUFLEN];
-	int complement_time = 0;
+	struct tab_comp_data comp_data = {
+		.tab_count = 0,
+		.buf = buf,
+		.buf_index = &i,
+	};
+	bool display_comp = false;
+
+	memset(buf, 0, BUFLEN);
 
 	if (prompt != NULL) {
 		printf("%s", prompt);
@@ -105,12 +134,42 @@ char *readline(const char *prompt)
 		if (c < 0)
 			return NULL;
 		// TODO(Lab5): your code here
-		if (c == '\r' || c == '\n' || i == BUFLEN - 1)
+		if (c == '\r' || c == '\n') {
+			if (display_comp)
+				strcpy(buf, comp_data.complement);
 			break;
+		}
+		if (c == '\t') {
+			// handle tab complement
+			comp_data.tab_count++;
+			comp_data.walk_count = 0;
+			ret = walk(getcwd(), _readline_tab_comp_walk_cb,
+				   &comp_data);
+			if (ret < 0) {
+				BUG("walk current working directory failed");
+			} else if (ret == 0) {
+				// didn't find, start from first again
+				comp_data.tab_count = 1;
+				comp_data.walk_count = 0;
+				ret = walk(getcwd(), _readline_tab_comp_walk_cb,
+					   &comp_data);
+			}
+			if (ret == 1) {
+				printf("\n%s%s", prompt, comp_data.complement);
+				display_comp = true;
+			}
+			continue;
+		}
+		if (display_comp) {
+			strcpy(buf, comp_data.complement);
+			i = strlen(buf);
+			display_comp = false;
+		}
 		buf[i++] = c;
+		comp_data.tab_count = 0;
 		usys_putc(c);
 	}
-	buf[i] = '\0';
+	// buf[i] = '\0';
 	printf("\n");
 	return buf;
 }
