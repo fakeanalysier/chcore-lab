@@ -20,12 +20,68 @@ int fs_server_cap;
 
 #define BUFLEN 4096
 
-#define MAX_PATH_LEN 256
-static char cwd[MAX_PATH_LEN] = { 0 };
-
 #define BUILTIN_CMD_MAX_LEN 16
 
 extern char getch();
+
+#define MAX_PATH_LEN 256
+static char cwd[MAX_PATH_LEN] = { 0 };
+
+static const char *getcwd()
+{
+	if (*cwd) {
+		return cwd;
+	} else {
+		return "/";
+	}
+}
+
+// walk through a directory, run callback for each dirent
+static int walk(const char *dir, bool (*callback)(struct dirent *, void *),
+		void *data)
+{
+	if (!callback)
+		return;
+
+	struct fs_request req = {
+		.req = FS_REQ_SCAN,
+		.count = PAGE_SIZE,
+		.offset = 0,
+	};
+
+	if (!*dir) {
+		strcpy(req.path, getcwd());
+	} else if (*dir == '/') {
+		strcpy(req.path, dir);
+	} else {
+		strcpy(req.path, cwd);
+		strcat(req.path, "/");
+		strcat(req.path, dir);
+	}
+
+	int ret;
+	int count = 0;
+	do {
+		ipc_msg_t *ipc_msg =
+			ipc_create_msg(&ipc_struct, sizeof(req), 1);
+		ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
+		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
+		ret = ipc_call(&ipc_struct, ipc_msg);
+		ipc_destroy_msg(ipc_msg);
+		if (ret < 0) {
+			return ret;
+		}
+		req.offset += ret;
+		struct dirent *dirent = (struct dirent *)TMPFS_SCAN_BUF_VADDR;
+		for (int i = 0; i < ret; i++) {
+			count++;
+			if (callback(dirent, data))
+				return count;
+			dirent = (void *)dirent + dirent->d_reclen;
+		}
+	} while (ret != 0);
+	return count;
+}
 
 // read a command from stdin leading by `prompt`
 // put the commond in `buf` and return `buf`
@@ -59,50 +115,23 @@ char *readline(const char *prompt)
 	return buf;
 }
 
-static const char *getcwd()
+static bool _builtin_cmd_ls_walk_cb(struct dirent *dent, void *data)
 {
-	if (*cwd) {
-		return cwd;
-	} else {
-		return "/";
-	}
+	printf("%s\n", dent->d_name);
+	return false; // keep walking
 }
 
 static void builtin_cmd_ls(const char *arg)
 {
-	struct fs_request req = {
-		.req = FS_REQ_SCAN,
-		.count = PAGE_SIZE,
-		.offset = 0,
-	};
-	if (!*arg) {
-		strcpy(req.path, getcwd());
-	} else if (*arg == '/') {
-		strcpy(req.path, arg);
-	} else {
-		strcpy(req.path, cwd);
-		strcat(req.path, "/");
-		strcat(req.path, arg);
+	int ret = walk(arg, _builtin_cmd_ls_walk_cb, NULL);
+	if (ret < 0) {
+		printf("ls: failed to list files, ret: %d\n", ret);
 	}
-	int ret;
-	do {
-		ipc_msg_t *ipc_msg =
-			ipc_create_msg(&ipc_struct, sizeof(req), 1);
-		ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
-		ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
-		ret = ipc_call(&ipc_struct, ipc_msg);
-		ipc_destroy_msg(ipc_msg);
-		if (ret < 0) {
-			printf("ls: failed to list files, ret: %d\n", ret);
-			return;
-		}
-		req.offset += ret;
-		struct dirent *dirent = (struct dirent *)TMPFS_SCAN_BUF_VADDR;
-		for (int i = 0; i < ret; i++) {
-			printf("%s\n", dirent->d_name);
-			dirent = (void *)dirent + dirent->d_reclen;
-		}
-	} while (ret != 0);
+}
+
+static bool _builtin_cmd_cd_walk_cb(struct dirent *dent, void *data)
+{
+	return true; // stop walking immediately
 }
 
 static void builtin_cmd_cd(const char *arg)
@@ -117,26 +146,7 @@ static void builtin_cmd_cd(const char *arg)
 		return;
 	}
 
-	struct fs_request req = {
-		.req = FS_REQ_SCAN,
-		.count = PAGE_SIZE,
-		.offset = 0,
-	};
-
-	if (*arg == '/') {
-		strcpy(req.path, arg);
-	} else {
-		strcpy(req.path, cwd);
-		strcat(req.path, "/");
-		strcat(req.path, arg);
-	}
-
-	ipc_msg_t *ipc_msg = ipc_create_msg(&ipc_struct, sizeof(req), 1);
-	ipc_set_msg_cap(ipc_msg, 0, tmpfs_scan_pmo_cap);
-	ipc_set_msg_data(ipc_msg, &req, 0, sizeof(req));
-	int ret = ipc_call(&ipc_struct, ipc_msg);
-	ipc_destroy_msg(ipc_msg);
-
+	int ret = walk(arg, _builtin_cmd_cd_walk_cb, NULL);
 	if (ret >= 0) {
 		if (*arg == '/') {
 			strcpy(cwd, *(arg + 1) ? arg : "");
