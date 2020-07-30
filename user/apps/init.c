@@ -134,13 +134,26 @@ char *readline(const char *prompt)
 		if (c < 0)
 			return NULL;
 		// TODO(Lab5): your code here
+		if (display_comp && c != '\t') {
+			strcpy(buf, comp_data.complement);
+			i = strlen(buf);
+			display_comp = false;
+			comp_data.tab_count = 0;
+		}
+		if (c >= 0x20 && c < 0x7f) {
+			// printable chars
+			buf[i++] = c;
+			usys_putc(c);
+			continue;
+		}
+		// control chars
 		if (c == '\r' || c == '\n') {
-			if (display_comp)
-				strcpy(buf, comp_data.complement);
 			break;
 		}
 		if (c == '\t') {
 			// handle tab complement
+			int printed_len =
+				display_comp ? strlen(comp_data.complement) : i;
 			comp_data.tab_count++;
 			comp_data.walk_count = 0;
 			ret = walk(getcwd(), _readline_tab_comp_walk_cb,
@@ -155,19 +168,23 @@ char *readline(const char *prompt)
 					   &comp_data);
 			}
 			if (ret == 1) {
-				printf("\n%s%s", prompt, comp_data.complement);
+				// printf("\n%s%s", prompt, comp_data.complement);
+				for (j = 0; j < printed_len; j++)
+					usys_putc('\b');
+				for (j = 0; j < printed_len; j++)
+					usys_putc(' ');
+				for (j = 0; j < printed_len; j++)
+					usys_putc('\b');
+				printf("%s", comp_data.complement);
 				display_comp = true;
 			}
-			continue;
+		} else if (c == 0x7f /* DEL */) {
+			if (i > 0) {
+				buf[--i] = '\0';
+				printf("\b \b");
+			}
 		}
-		if (display_comp) {
-			strcpy(buf, comp_data.complement);
-			i = strlen(buf);
-			display_comp = false;
-		}
-		buf[i++] = c;
-		comp_data.tab_count = 0;
-		usys_putc(c);
+		// ignore other control chars
 	}
 	// buf[i] = '\0';
 	printf("\n");
